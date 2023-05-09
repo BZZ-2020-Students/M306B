@@ -3,8 +3,11 @@
 <head>
     <title>Getting Started: Serving Web Content</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link th:href="@{/styles/style.css}" rel="stylesheet" />
 </head>
+<script type="text/javascript" th:src="@{/js/basic_js.js}"></script>
 <body>
 <p th:text="'Hello, ' + ${name} + '!'"/>
+<button type="button" th:onclick="show_alert()">Show Alert</button>
 </body>
 </html>

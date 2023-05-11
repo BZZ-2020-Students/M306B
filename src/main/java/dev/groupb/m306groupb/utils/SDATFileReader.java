@@ -98,7 +98,7 @@ public class SDATFileReader implements FileReader<SDATFile> {
 
             NodeList observationNodeList = doc.getElementsByTagName("rsm:Observation");
             if (observationNodeList.getLength() == 0)
-                return null;
+                throw new RuntimeException("No observations found in file");
 
             SortedSet<Observation> observations = new TreeSet<>();
             for (int i = 0; i < observationNodeList.getLength(); i++) {
@@ -165,7 +165,7 @@ public class SDATFileReader implements FileReader<SDATFile> {
                 }
             }
 
-            return null;
+            throw new RuntimeException("Measure unit not found");
         } catch (ParserConfigurationException | IOException | SAXException e) {
             throw new RuntimeException(e);
         }
@@ -181,7 +181,7 @@ public class SDATFileReader implements FileReader<SDATFile> {
 
             NodeList resolutionNode = doc.getElementsByTagName("rsm:Resolution");
             if (resolutionNode.getLength() == 0)
-                return null;
+                throw new RuntimeException("Resolution not found");
             Resolution resolution = new Resolution();
             for (int i = 0; i < resolutionNode.getLength(); i++) {
                 Node item = resolutionNode.item(i);

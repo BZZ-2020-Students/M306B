@@ -1,4 +1,4 @@
-package dev.groupb.m306groupb.model;
+package dev.groupb.m306groupb.enums;
 
 public enum FileType {
     Consumption,

@@ -20,7 +20,7 @@ public class SDATFileReader implements FileReader<SDATFile> {
     @Override
     public FileDate getFileDate(File file) {
         // Format looks like this: 2019-03-11T23:00:00Z
-        SimpleDateFormat dateFormat =new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        SimpleDateFormat dateFormat = new SimpleDateFormat(GlobalStuff.XML_DATE_FORMAT);
 
         try {
             FileDate fileDate = new FileDate();

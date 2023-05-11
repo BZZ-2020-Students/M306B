@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.SortedSet;
+import java.util.TreeSet;
 
 public class SDATFileReader implements FileReader<SDATFile> {
     @Override
@@ -88,7 +89,54 @@ public class SDATFileReader implements FileReader<SDATFile> {
     }
 
     private SortedSet<Observation> findObservations(File file) {
-        return null;
+        try {
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            Document doc = dBuilder.parse(file);
+
+            doc.getDocumentElement().normalize();
+
+            NodeList observationNodeList = doc.getElementsByTagName("rsm:Observation");
+            if (observationNodeList.getLength() == 0)
+                return null;
+
+            SortedSet<Observation> observations = new TreeSet<>();
+            for (int i = 0; i < observationNodeList.getLength(); i++) {
+                Node item = observationNodeList.item(i);
+                item.normalize();
+
+                NodeList children = item.getChildNodes();
+                Observation observation = new Observation();
+                for (int j = 0; j < children.getLength(); j++) {
+                    Node child = children.item(j);
+                    child.normalize();
+
+
+                    if (child.getNodeName().equals("rsm:Position")) {
+                        NodeList positionChildren = child.getChildNodes();
+
+                        for (int k = 0; k < positionChildren.getLength(); k++) {
+                            Node positionChild = positionChildren.item(k);
+                            positionChild.normalize();
+
+                            if (positionChild.getNodeName().equals("rsm:Sequence")) {
+                                observation.setPosition(Integer.parseInt(positionChild.getTextContent()));
+                            }
+                        }
+                    } else if (child.getNodeName().equals("rsm:Volume")) {
+                        String volume = child.getTextContent();
+                        observation.setVolume(Double.parseDouble(volume));
+                    }
+                }
+                if (observation.getPosition() != null && observation.getVolume() != null) {
+                    observations.add(observation);
+                }
+            }
+
+            return observations;
+        } catch (ParserConfigurationException | IOException | SAXException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private MeasureUnit findMeasureUnit(File file) {

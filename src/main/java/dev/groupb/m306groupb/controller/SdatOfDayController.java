@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.groupb.m306groupb.model.FileDate;
 import dev.groupb.m306groupb.model.SDATFile.SDATCache;
 import dev.groupb.m306groupb.model.SDATFile.SDATFile;
+import dev.groupb.m306groupb.model.SDATFile.SDATFileWithDate;
 import dev.groupb.m306groupb.utils.GlobalStuff;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -47,17 +48,18 @@ public class SdatOfDayController {
                     .fileCreationDate(creationDate != null ? simpleDateFormat.parse(creationDate) : null)
                     .build();
 
-            SDATFile[] sdatFiles = sdatCache.getSdatFileHashMap().entrySet().stream()
+            Map.Entry<FileDate, SDATFile[]> foundEntry = sdatCache.getSdatFileHashMap().entrySet().stream()
                     .filter(entry -> fileDate.getStartDate() == null || entry.getKey().getStartDate().equals(fileDate.getStartDate()))
                     .filter(entry -> fileDate.getEndDate() == null || entry.getKey().getEndDate().equals(fileDate.getEndDate()))
                     .filter(entry -> fileDate.getFileCreationDate() == null || entry.getKey().getFileCreationDate().equals(fileDate.getFileCreationDate()))
-                    .map(Map.Entry::getValue)
                     .findFirst()
                     .orElse(null);
 
             // Serialize to json
-            if (sdatFiles != null) {
-                model.addAttribute("sdatFiles", new ObjectMapper().writeValueAsString(sdatFiles));
+            if (foundEntry != null) {
+                ObjectMapper objectMapper = new ObjectMapper();
+                objectMapper.setDateFormat(simpleDateFormat);
+                model.addAttribute("sdatFiles", objectMapper.writeValueAsString(SDATFileWithDate.builder().SDATFiles(foundEntry.getValue()).fileDate(foundEntry.getKey()).build()));
             }
         } catch (ParseException | JsonProcessingException e) {
             throw new RuntimeException(e);

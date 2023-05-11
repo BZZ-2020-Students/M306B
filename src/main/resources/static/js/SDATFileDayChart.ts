@@ -1,29 +1,68 @@
-async function SDATFileDayChart(sdatFiles: any) {
-    console.log(JSON.stringify(sdatFiles));
+enum FileType {
+    Consumption = "Consumption",
+    Production = "Production"
+}
 
-    const data = [
-        {year: 2010, count: 10},
-        {year: 2011, count: 20},
-        {year: 2012, count: 15},
-        {year: 2013, count: 25},
-        {year: 2014, count: 22},
-        {year: 2015, count: 30},
-        {year: 2016, count: 28},
-    ];
+enum MeasureUnit {
+    KWH = "KWH",
+}
 
+enum TimeUnit {
+    MIN = "MIN",
+}
+
+interface FileDate {
+    fileCreationDate: string;
+    startDate: string;
+    endDate: string;
+}
+
+interface Resolution {
+    timeUnit: TimeUnit;
+    resolution: number;
+}
+
+interface Observation {
+    position: number;
+    volume: number;
+}
+
+interface SdatFile {
+    fileName: string;
+    fileType: FileType;
+    resolution: Resolution;
+    measureUnit: MeasureUnit;
+    observations: Observation[];
+}
+
+interface Data {
+    fileDate: FileDate;
+    sdatfiles: SdatFile[];
+}
+
+async function SDATFileDayChart(sdatFilesRaw: any) {
+    let jsonData: Data = JSON.parse(sdatFilesRaw);
+
+    const datasets = jsonData.sdatfiles.map(sdatFile => {
+        return {
+            label: sdatFile.fileType,
+            data: sdatFile.observations.map(observation => observation.volume)
+        }
+    });
+
+    const labels = jsonData.sdatfiles[0].observations.map(observation => observation.position);
+
+    const data = {
+        labels: labels,
+        datasets: datasets
+    }
+
+    // @ts-ignore
     new Chart(
         document.getElementById('sdat-file-chart'),
         {
-            type: 'bar',
-            data: {
-                labels: data.map(row => row.year),
-                datasets: [
-                    {
-                        label: 'SDAT per day',
-                        data: data.map(row => row.count)
-                    }
-                ]
-            }
+            type: 'line',
+            data: data,
         }
     );
 }

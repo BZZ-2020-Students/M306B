@@ -1,4 +1,4 @@
-package dev.groupb.m306groupb.config;
+package dev.groupb.m306groupb.fileChange;
 
 import org.springframework.boot.devtools.filewatch.ChangedFile;
 import org.springframework.boot.devtools.filewatch.ChangedFiles;
@@ -13,22 +13,20 @@ import java.nio.file.StandardOpenOption;
 import java.util.Set;
 
 @Component
-public class MyFileChangeListener implements FileChangeListener {
+public class ESLFileChangeListener implements FileChangeListener {
 
     @Override
     public void onChange(Set<ChangedFiles> changeSet) {
-        for(ChangedFiles cfiles : changeSet) {
-            for(ChangedFile cfile: cfiles.getFiles()) {
+        for (ChangedFiles cfiles : changeSet) {
+            for (ChangedFile cfile : cfiles.getFiles()) {
                 switch (cfile.getType()) {
-                    case ADD -> System.out.println("File added: " + cfile.getFile().getName());
-                    case DELETE -> System.out.println("File deleted: " + cfile.getFile().getName());
-                    case MODIFY -> System.out.println("File modified: " + cfile.getFile().getName());
+                    case ADD -> System.out.println("ESL File added: " + cfile.getFile().getName());
+                    case DELETE -> System.out.println("ESL File deleted: " + cfile.getFile().getName());
+                    case MODIFY -> System.out.println("ESL File modified: " + cfile.getFile().getName());
                 }
-                if( /* (cfile.getType().equals(Type.MODIFY)
+                if ( /* (cfile.getType().equals(Type.MODIFY)
                      || cfile.getType().equals(Type.ADD)
                      || cfile.getType().equals(Type.DELETE) ) && */ !isLocked(cfile.getFile().toPath())) {
-                    System.out.println("Operation: " + cfile.getType()
-                            + " On file: "+ cfile.getFile().getName() + " is done");
                 }
             }
         }

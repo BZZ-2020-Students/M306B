@@ -1,4 +1,4 @@
-package dev.groupb.m306groupb.config;
+package dev.groupb.m306groupb.fileChange;
 
 import jakarta.annotation.PreDestroy;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,17 +18,28 @@ public class FileWatcherConfig {
     private String esl_files_path;
 
     @Bean
-    public FileSystemWatcher fileSystemWatcher() {
+    public FileSystemWatcher fileSystemWatcherSDAT() {
         FileSystemWatcher fileSystemWatcher = new FileSystemWatcher(true, Duration.ofMillis(2000L), Duration.ofMillis(1000L));
         fileSystemWatcher.addSourceDirectory(new File(sdat_files_path));
-        fileSystemWatcher.addListener(new MyFileChangeListener());
+        fileSystemWatcher.addListener(new SDATFileChangeListener());
         fileSystemWatcher.start();
-        System.out.println("started fileSystemWatcher");
+        System.out.println("started SDAT fileSystemWatcher");
+        return fileSystemWatcher;
+    }
+
+    @Bean
+    public FileSystemWatcher fileSystemWatcherESL() {
+        FileSystemWatcher fileSystemWatcher = new FileSystemWatcher(true, Duration.ofMillis(2000L), Duration.ofMillis(1000L));
+        fileSystemWatcher.addSourceDirectory(new File(esl_files_path));
+        fileSystemWatcher.addListener(new ESLFileChangeListener());
+        fileSystemWatcher.start();
+        System.out.println("started ESL fileSystemWatcher");
         return fileSystemWatcher;
     }
 
     @PreDestroy
     public void onDestroy() throws Exception {
-        fileSystemWatcher().stop();
+        fileSystemWatcherSDAT().stop();
+        fileSystemWatcherESL().stop();
     }
 }

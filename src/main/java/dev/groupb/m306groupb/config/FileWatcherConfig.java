@@ -19,7 +19,7 @@ public class FileWatcherConfig {
 
     @Bean
     public FileSystemWatcher fileSystemWatcher() {
-        FileSystemWatcher fileSystemWatcher = new FileSystemWatcher(true, Duration.ofMillis(5000L), Duration.ofMillis(3000L));
+        FileSystemWatcher fileSystemWatcher = new FileSystemWatcher(true, Duration.ofMillis(2000L), Duration.ofMillis(1000L));
         fileSystemWatcher.addSourceDirectory(new File(sdat_files_path));
         fileSystemWatcher.addListener(new MyFileChangeListener());
         fileSystemWatcher.start();

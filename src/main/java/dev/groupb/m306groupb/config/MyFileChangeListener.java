@@ -19,6 +19,11 @@ public class MyFileChangeListener implements FileChangeListener {
     public void onChange(Set<ChangedFiles> changeSet) {
         for(ChangedFiles cfiles : changeSet) {
             for(ChangedFile cfile: cfiles.getFiles()) {
+                switch (cfile.getType()) {
+                    case ADD -> System.out.println("File added: " + cfile.getFile().getName());
+                    case DELETE -> System.out.println("File deleted: " + cfile.getFile().getName());
+                    case MODIFY -> System.out.println("File modified: " + cfile.getFile().getName());
+                }
                 if( /* (cfile.getType().equals(Type.MODIFY)
                      || cfile.getType().equals(Type.ADD)
                      || cfile.getType().equals(Type.DELETE) ) && */ !isLocked(cfile.getFile().toPath())) {

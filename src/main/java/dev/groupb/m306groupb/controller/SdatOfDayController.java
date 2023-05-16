@@ -18,42 +18,22 @@ import java.util.Map;
 
 @Controller
 public class SdatOfDayController {
-    @GetMapping("/sdat-day")
-    public String greeting(
-            @RequestParam(name = "startDate", required = false, defaultValue = "NULL") String startDate,
-            @RequestParam(name = "endDate", required = false, defaultValue = "NULL") String endDate,
-            @RequestParam(name = "creationDate", required = false, defaultValue = "NULL") String creationDate,
+    @GetMapping("/sdat-view")
+    public String sdatView(
+            @RequestParam(name = "dateRange") String dateRange,
             Model model
     ) {
-        if (startDate.equals("NULL")) {
-            startDate = null;
-        }
-        if (endDate.equals("NULL")) {
-            endDate = null;
-        }
-        if (creationDate.equals("NULL")) {
-            creationDate = null;
-        }
-        if (startDate == null && endDate == null && creationDate == null) {
-            return "sdat_of_day"; // TODO: Show error message
-        }
-
         SDATCache sdatCache = SDATCache.getInstance();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(GlobalStuff.XML_DATE_FORMAT);
 
         try {
             FileDate fileDate = FileDate.builder()
-                    .startDate(startDate != null ? simpleDateFormat.parse(startDate) : null)
-                    .endDate(endDate != null ? simpleDateFormat.parse(endDate) : null)
-                    .fileCreationDate(creationDate != null ? simpleDateFormat.parse(creationDate) : null)
+                    .startDate(simpleDateFormat.parse(dateRange))
                     .build();
 
-            Map.Entry<FileDate, SDATFile[]> foundEntry = sdatCache.getSdatFileHashMap().entrySet().stream()
+            Map.Entry<FileDate, SDATFile[]>[] foundEntries = sdatCache.getSdatFileHashMap().entrySet().stream()
                     .filter(entry -> fileDate.getStartDate() == null || entry.getKey().getStartDate().equals(fileDate.getStartDate()))
-                    .filter(entry -> fileDate.getEndDate() == null || entry.getKey().getEndDate().equals(fileDate.getEndDate()))
-                    .filter(entry -> fileDate.getFileCreationDate() == null || entry.getKey().getFileCreationDate().equals(fileDate.getFileCreationDate()))
-                    .findFirst()
-                    .orElse(null);
+                    .toArray(Map.Entry[]::new);
 
             // Serialize to json
             if (foundEntry != null) {

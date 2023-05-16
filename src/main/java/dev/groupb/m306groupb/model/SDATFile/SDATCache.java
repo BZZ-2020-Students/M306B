@@ -35,7 +35,6 @@ public class SDATCache {
         if (instance == null) {
             instance = new SDATCache();
         }
-
         return instance;
     }
 }

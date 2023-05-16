@@ -50,15 +50,15 @@ async function SDATFileDayChart(sdatFilesRaw: any) {
         }
     });
 
-    const labels = jsonData.sdatfiles[0].observations.map(observation => observation.position);
     const startDate = jsonData.fileDate.startDate
     const resolution = jsonData.sdatfiles[0].resolution;
     let dates = [];
     jsonData.sdatfiles[0].observations.forEach(function (observation) {
-        let minute = observation.position * resolution.resolution;
+        let minute = (observation.position - 1) * resolution.resolution;
         let newDate = new Date(startDate)
+        newDate.setMinutes(newDate.getMinutes() + minute)
 
-        dates.push(newDate.toLocaleDateString() + minute)
+        dates.push(newDate.toLocaleString())
     })
     const data = {
         labels: dates,

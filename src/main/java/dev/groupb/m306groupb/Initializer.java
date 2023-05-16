@@ -10,7 +10,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
-import java.util.HashMap;
 
 @Component
 public class Initializer implements CommandLineRunner {

@@ -19,6 +19,14 @@ public class SDATCache {
     private SDATCache() {
     }
 
+    public static SDATCache getInstance() {
+        if (instance == null) {
+            instance = new SDATCache();
+        }
+
+        return instance;
+    }
+
     public void addSDATFile(FileDate fileDate, SDATFile sdatFile) {
         SDATFile[] existing = sdatFileHashMap.get(fileDate);
         if (existing != null) {
@@ -29,13 +37,5 @@ public class SDATCache {
         } else {
             sdatFileHashMap.put(fileDate, new SDATFile[]{sdatFile});
         }
-    }
-
-    public static SDATCache getInstance() {
-        if (instance == null) {
-            instance = new SDATCache();
-        }
-
-        return instance;
     }
 }

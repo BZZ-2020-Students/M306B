@@ -1,7 +1,6 @@
 package dev.groupb.m306groupb.storage;
 
 import dev.groupb.m306groupb.enums.FileType;
-import dev.groupb.m306groupb.enums.SDATFileType;
 import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 

@@ -1,11 +1,17 @@
 package dev.groupb.m306groupb.model.ESLFile;
 
 import dev.groupb.m306groupb.model.FileDate;
+import dev.groupb.m306groupb.model.SDATFile.SDATCache;
+import dev.groupb.m306groupb.model.SDATFile.SDATFile;
+import dev.groupb.m306groupb.utils.ESLFileReader;
+import dev.groupb.m306groupb.utils.FileReader;
+import dev.groupb.m306groupb.utils.SDATFileReader;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.security.auth.callback.TextInputCallback;
+import java.io.File;
 import java.util.*;
 
 @Getter
@@ -19,6 +25,21 @@ public class ESLCache {
 
     private ESLCache() {
 
+    }
+
+    public static void fillCacheParallel(String filesPath) {
+        ESLCache sdatCache = ESLCache.getInstance();
+        sdatCache.getEslFileMap().clear();
+
+        ESLFileReader eslFileReader = new ESLFileReader();
+        File[] files = FileReader.getFiles(filesPath);
+
+        Arrays.stream(files).parallel().forEach(file -> {
+            ESLFile sdatFile = eslFileReader.parseFile(file);
+            FileDate fileDate = eslFileReader.getFileDate(file);
+
+            sdatCache.addESLFile(fileDate, sdatFile);
+        });
     }
 
     public void addESLFile(FileDate fileDate, ESLFile eslFile) {

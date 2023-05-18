@@ -16,6 +16,12 @@ import java.io.InputStream;
 @RequestMapping("/api/upload")
 @RestController
 public class uploadDataService {
+    @Value("${sdat.files.path}")
+    private String sdat_files_path;
+
+    @Value("${esl.files.path}")
+    private String esl_files_path;
+
     @PostMapping("/files")
     public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
         try {
@@ -51,10 +57,10 @@ public class uploadDataService {
 
     public String determineDirectory(String fileType) throws Exception {
         if(fileType.equals("ESL")){
-            return "files/ESL-Files/";
+            return esl_files_path;
         }
         else if(fileType.equals("SDAT")){
-            return "files/SDAT-Files/";
+            return sdat_files_path;
         }
         else {
             throw new Exception("Filetype is neither ESL or SDAT!");
@@ -72,11 +78,4 @@ public class uploadDataService {
         // Example: Check if the first few bytes match the expected signature for SDAT files
         return bytes[0] == 0x53 && bytes[1] == 0x44 && bytes[2] == 0x41 && bytes[3] == 0x54;
     }
-
-    @Value("${sdat.files.path}")
-    private String sdat_files_path;
-
-    @Value("${esl.files.path}")
-    private String esl_files_path;
-
 }

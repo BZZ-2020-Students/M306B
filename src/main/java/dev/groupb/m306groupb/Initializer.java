@@ -10,6 +10,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
+import java.util.Arrays;
 
 @Component
 public class Initializer implements CommandLineRunner {
@@ -21,21 +22,8 @@ public class Initializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        SDATCache sdatCache = SDATCache.getInstance();
-
-        SDATFileReader sdatFileReader = new SDATFileReader();
-        File[] files = FileReader.getFiles(sdat_files_path);
-
-        int amountFilesToLoad = files.length;
-        int amountFilesLoaded = 0;
-        for (File file : files) {
-            SDATFile sdatFile = sdatFileReader.parseFile(file);
-            FileDate fileDate = sdatFileReader.getFileDate(file);
-
-            sdatCache.addSDATFile(fileDate, sdatFile);
-
-            amountFilesLoaded++;
-            System.out.println("Loading SDAT files: " + amountFilesLoaded + "/" + amountFilesToLoad + " (" + (int) ((double) amountFilesLoaded / amountFilesToLoad * 100) + "%)");
-        }
+        System.out.println("Loading SDAT files...");
+        SDATCache.fillCacheParallel(sdat_files_path);
+        System.out.println("All SDAT files processed and loaded!");
     }
 }

@@ -71,7 +71,6 @@ public class ESLFileReader implements FileReader<ESLFile> {
                     }
                 }
             }
-            System.out.println(valuerow);
 
             return obisValues;
         } catch (ParserConfigurationException | IOException | SAXException e) {

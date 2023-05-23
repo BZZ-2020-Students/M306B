@@ -1,10 +1,14 @@
 package dev.groupb.m306groupb.model.SDATFile;
 
 import dev.groupb.m306groupb.model.FileDate;
+import dev.groupb.m306groupb.utils.FileReader;
+import dev.groupb.m306groupb.utils.SDATFileReader;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.File;
+import java.util.Arrays;
 import java.util.HashMap;
 
 @Getter
@@ -17,6 +21,36 @@ public class SDATCache {
     private final HashMap<FileDate, SDATFile[]> sdatFileHashMap = new HashMap<>();
 
     private SDATCache() {
+    }
+
+    public static void fillCacheParallel(String filesPath) {
+        SDATCache sdatCache = SDATCache.getInstance();
+        sdatCache.getSdatFileHashMap().clear();
+
+        SDATFileReader sdatFileReader = new SDATFileReader();
+        File[] files = FileReader.getFiles(filesPath);
+
+        Arrays.stream(files).parallel().forEach(file -> {
+            SDATFile sdatFile = sdatFileReader.parseFile(file);
+            FileDate fileDate = sdatFileReader.getFileDate(file);
+
+            sdatCache.addSDATFile(fileDate, sdatFile);
+        });
+    }
+
+    public static void fillCacheSequential(String filesPath) {
+        SDATCache sdatCache = SDATCache.getInstance();
+        sdatCache.getSdatFileHashMap().clear();
+
+        SDATFileReader sdatFileReader = new SDATFileReader();
+        File[] files = FileReader.getFiles(filesPath);
+
+        for (File file : files) {
+            SDATFile sdatFile = sdatFileReader.parseFile(file);
+            FileDate fileDate = sdatFileReader.getFileDate(file);
+
+            sdatCache.addSDATFile(fileDate, sdatFile);
+        }
     }
 
     public static SDATCache getInstance() {

@@ -4,11 +4,9 @@ public enum MeasureUnit {
     KWH;
 
     public static MeasureUnit fromString(String unit) {
-        switch (unit) {
-            case "KWH":
-                return KWH;
-            default:
-                throw new IllegalArgumentException("Unknown unit: " + unit);
+        if (unit.equals("KWH")) {
+            return KWH;
         }
+        throw new IllegalArgumentException("Unknown unit: " + unit);
     }
 }

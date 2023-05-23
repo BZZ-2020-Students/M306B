@@ -16,7 +16,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
 public class ESLFileReader implements FileReader<ESLFile> {
-
+  
     @Override
     public FileDate getFileDate(File file) {
         SimpleDateFormat dateFormat = new SimpleDateFormat(GlobalStuff.ESL_DATE_FORMAT);

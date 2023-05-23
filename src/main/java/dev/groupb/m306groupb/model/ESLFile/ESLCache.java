@@ -8,7 +8,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.File;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
 
 @Getter
 public class ESLCache {
@@ -38,14 +39,14 @@ public class ESLCache {
         });
     }
 
-    public void addESLFile(FileDate fileDate, ESLFile eslFile) {
-        eslFileMap.put(fileDate, eslFile);
-    }
-
     public static ESLCache getInstance() {
         if (instance == null) {
             instance = new ESLCache();
         }
         return instance;
+    }
+
+    public void addESLFile(FileDate fileDate, ESLFile eslFile) {
+        eslFileMap.put(fileDate, eslFile);
     }
 }

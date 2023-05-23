@@ -16,7 +16,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
 public class ESLFileReader implements FileReader<ESLFile> {
-  
+
     @Override
     public FileDate getFileDate(File file) {
         SimpleDateFormat dateFormat = new SimpleDateFormat(GlobalStuff.ESL_DATE_FORMAT);
@@ -35,7 +35,6 @@ public class ESLFileReader implements FileReader<ESLFile> {
                 Node creationDate = headerList.item(i);
                 creationDate.normalize();
                 String created = creationDate.getAttributes().getNamedItem("created").getNodeValue();
-                //System.out.println(created);
                 fileDate.setFileCreationDate(dateFormat.parse(created));
             }
 
@@ -43,9 +42,7 @@ public class ESLFileReader implements FileReader<ESLFile> {
             for (int j = 0; j < timePeriodList.getLength(); j++) {
                 Node timePeriod = timePeriodList.item(j);
                 String end = timePeriod.getAttributes().getNamedItem("end").getNodeValue();
-                System.out.println(end);
                 fileDate.setEndDate(dateFormat.parse(end));
-                break;
             }
 
             return fileDate;
@@ -56,9 +53,10 @@ public class ESLFileReader implements FileReader<ESLFile> {
 
     @Override
     public ESLFile parseFile(File file) {
-        getFileDate(file);
         double[] obisValues = findValues(file);
         return ESLFile.builder()
+                .fileName(file.getName())
+                .filePath(file.getAbsolutePath())
                 .highTariffConsumption(obisValues[0])
                 .lowTariffConsumption(obisValues[1])
                 .highTariffProduction(obisValues[2])

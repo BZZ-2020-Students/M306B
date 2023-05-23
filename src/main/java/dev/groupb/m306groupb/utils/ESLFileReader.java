@@ -52,7 +52,7 @@ public class ESLFileReader implements FileReader<ESLFile> {
     }
 
     @Override
-    public ESLFile parseFile(File file) {
+    public ESLFile[] parseFile(File file) {
         double[] obisValues = findValues(file);
         return ESLFile.builder()
                 .fileName(file.getName())

@@ -1,16 +1,12 @@
 package dev.groupb.m306groupb.model.ESLFile;
 
 import dev.groupb.m306groupb.model.FileDate;
-import dev.groupb.m306groupb.model.SDATFile.SDATCache;
-import dev.groupb.m306groupb.model.SDATFile.SDATFile;
 import dev.groupb.m306groupb.utils.ESLFileReader;
 import dev.groupb.m306groupb.utils.FileReader;
-import dev.groupb.m306groupb.utils.SDATFileReader;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.security.auth.callback.TextInputCallback;
 import java.io.File;
 import java.util.*;
 

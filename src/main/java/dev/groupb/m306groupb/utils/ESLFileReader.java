@@ -6,7 +6,7 @@ import dev.groupb.m306groupb.model.FileDate;
 import java.io.File;
 import java.text.SimpleDateFormat;
 
-public class ESLFileReader implements FileReader<ESLFile>{
+public class ESLFileReader implements FileReader<ESLFile> {
     SimpleDateFormat dateFormat = new SimpleDateFormat(GlobalStuff.XML_DATE_FORMAT);
 
     @Override

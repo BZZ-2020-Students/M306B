@@ -14,7 +14,7 @@ import java.io.File;
 import java.io.IOException;
 
 public class ESLFileReader implements FileReader<ESLFile> {
-
+  
     @Override
     public FileDate getFileDate(File file) {
         return null;

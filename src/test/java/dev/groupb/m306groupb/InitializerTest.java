@@ -1,16 +1,9 @@
 package dev.groupb.m306groupb;
 
-import dev.groupb.m306groupb.model.FileDate;
 import dev.groupb.m306groupb.model.SDATFile.SDATCache;
-import dev.groupb.m306groupb.model.SDATFile.SDATFile;
-import dev.groupb.m306groupb.utils.FileReader;
-import dev.groupb.m306groupb.utils.SDATFileReader;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import java.io.File;
-import java.util.Arrays;
 
 @SpringBootTest
 class InitializerTest {

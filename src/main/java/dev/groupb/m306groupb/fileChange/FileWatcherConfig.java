@@ -22,7 +22,6 @@ public class FileWatcherConfig {
         FileSystemWatcher fileSystemWatcher = new FileSystemWatcher(true, Duration.ofMillis(2000L), Duration.ofMillis(1000L));
         fileSystemWatcher.addSourceDirectory(new File(sdat_files_path));
         fileSystemWatcher.addListener(new SDATFileChangeListener());
-        fileSystemWatcher.setTriggerFilter(pathname -> pathname.getName().endsWith(".xml"));
         fileSystemWatcher.start();
         System.out.println("started SDAT fileSystemWatcher");
         return fileSystemWatcher;
@@ -33,7 +32,6 @@ public class FileWatcherConfig {
         FileSystemWatcher fileSystemWatcher = new FileSystemWatcher(true, Duration.ofMillis(2000L), Duration.ofMillis(1000L));
         fileSystemWatcher.addSourceDirectory(new File(esl_files_path));
         fileSystemWatcher.addListener(new ESLFileChangeListener());
-        fileSystemWatcher.setTriggerFilter(pathname -> pathname.getName().endsWith(".xml"));
         fileSystemWatcher.start();
         System.out.println("started ESL fileSystemWatcher");
         return fileSystemWatcher;

@@ -7,6 +7,7 @@ import dev.groupb.m306groupb.model.SDATFile.SDATCache;
 import dev.groupb.m306groupb.model.SDATFile.SDATFile;
 import dev.groupb.m306groupb.model.SDATFile.SDATFileWithDate;
 import dev.groupb.m306groupb.utils.GlobalStuff;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,26 +15,30 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 @Controller
 public class SdatOfDayController {
     @GetMapping("/sdat-view")
     public String sdatView(
-            @RequestParam(name = "dateRange") String dateRange,
+            @RequestParam("from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date from,
+            @RequestParam("to") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date to,
             Model model
     ) {
         SDATCache sdatCache = SDATCache.getInstance();
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(GlobalStuff.XML_DATE_FORMAT);
 
         try {
-            FileDate fileDate = FileDate.builder()
-                    .startDate(simpleDateFormat.parse(dateRange))
-                    .build();
+            HashMap<FileDate, SDATFile[]> sdatFileHashMap = sdatCache.getSdatFileHashMap();
+            SDATFile[] sdatFiles = sdatFileHashMap.entrySet().stream()
+                    .filter(entry -> !entry.getKey().getStartDate().before(from) && !entry.getKey().getStartDate().after(to))
+                    .flatMap(entry -> Arrays.stream(entry.getValue()))
+                    .toArray(SDATFile[]::new);
 
-            Map.Entry<FileDate, SDATFile[]>[] foundEntries = sdatCache.getSdatFileHashMap().entrySet().stream()
-                    .filter(entry -> fileDate.getStartDate() == null || entry.getKey().getStartDate().equals(fileDate.getStartDate()))
-                    .toArray(Map.Entry[]::new);
+
 
             // Serialize to json
             if (foundEntry != null) {

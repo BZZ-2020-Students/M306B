@@ -1,0 +1,42 @@
+<html xmlns:th="https://www.thymeleaf.org">
+<body>
+
+<div th:if="${message}">
+    <h2 th:text="${message}"/>
+</div>
+
+<div>
+    <!--  TODO: make prettier  -->
+    <!--  TODO: action depending on filetype instead of hardcoded. maybe a dropdown to select?  -->
+    <form action="/sdat" enctype="multipart/form-data" method="POST">
+        <table>
+            <tr>
+                <td>File to upload:</td>
+                <td><input name="file" type="file"/></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><input type="submit" value="Upload"/></td>
+            </tr>
+        </table>
+    </form>
+</div>
+<!-- Display all already uploaded files (very ugly, todo: improve, if even needed?) -->
+<div>
+    <h2>Uploaded SDAT Files</h2>
+    <ul>
+        <li th:each="SDATFile : ${SDATFiles}">
+            <a th:href="${SDATFile}" th:text="${SDATFile}"/>
+        </li>
+    </ul>
+
+    <h2>Uploaded ESL Files</h2>
+    <ul>
+        <li th:each="ESLFile : ${ESLFiles}">
+            <a th:href="${ESLFile}" th:text="${ESLFile}"/>
+        </li>
+    </ul>
+</div>
+
+</body>
+</html>

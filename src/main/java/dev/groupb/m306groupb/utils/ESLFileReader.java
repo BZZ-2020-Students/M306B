@@ -12,16 +12,51 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
 public class ESLFileReader implements FileReader<ESLFile> {
 
     @Override
     public FileDate getFileDate(File file) {
-        return null;
+        SimpleDateFormat dateFormat = new SimpleDateFormat(GlobalStuff.ESL_DATE_FORMAT);
+
+        try {
+            FileDate fileDate = new FileDate();
+
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            Document doc = dBuilder.parse(file);
+
+            doc.getDocumentElement().normalize();
+
+            NodeList headerList = doc.getElementsByTagName("Header");
+            for (int i = 0; i < headerList.getLength(); i++) {
+                Node creationDate = headerList.item(i);
+                creationDate.normalize();
+                String created = creationDate.getAttributes().getNamedItem("created").getNodeValue();
+                //System.out.println(created);
+                fileDate.setFileCreationDate(dateFormat.parse(created));
+            }
+
+            NodeList timePeriodList = doc.getElementsByTagName("TimePeriod");
+            for (int j = 0; j < timePeriodList.getLength(); j++) {
+                Node timePeriod = timePeriodList.item(j);
+                String end = timePeriod.getAttributes().getNamedItem("end").getNodeValue();
+                System.out.println(end);
+                fileDate.setEndDate(dateFormat.parse(end));
+                break;
+            }
+
+            return fileDate;
+        } catch (ParserConfigurationException | IOException | SAXException | ParseException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public ESLFile parseFile(File file) {
+        getFileDate(file);
         double[] obisValues = findValues(file);
         return ESLFile.builder()
                 .highTariffConsumption(obisValues[0])

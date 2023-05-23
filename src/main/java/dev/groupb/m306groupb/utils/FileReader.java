@@ -12,5 +12,5 @@ public interface FileReader<T> {
 
     FileDate getFileDate(File file);
 
-    T[] parseFile(File file);
+    T parseFile(File file);
 }

@@ -77,15 +77,15 @@ public class SDATFileReader implements FileReader<SDATFile> {
     }
 
     @Override
-    public SDATFile[] parseFile(File file) {
-        return new SDATFile[]{SDATFile.builder()
+    public SDATFile parseFile(File file) {
+        return SDATFile.builder()
                 .fileName(file.getName())
                 .filePath(file.getAbsolutePath())
                 .SDATFileType(findFileType(file))
                 .resolution(findResolution(file))
                 .measureUnit(findMeasureUnit(file))
                 .observations(findObservations(file))
-                .build()};
+                .build();
     }
 
     private SortedSet<Observation> findObservations(File file) {

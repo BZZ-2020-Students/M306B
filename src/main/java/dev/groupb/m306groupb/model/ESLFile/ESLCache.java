@@ -32,10 +32,13 @@ public class ESLCache {
         File[] files = FileReader.getFiles(filesPath);
 
         Arrays.stream(files).parallel().forEach(file -> {
-            ESLFile sdatFile = eslFileReader.parseFile(file);
-            FileDate fileDate = eslFileReader.getFileDate(file);
-
-            sdatCache.addESLFile(fileDate, sdatFile);
+            int amountOfESLFilesToExpect = eslFileReader.amountOfEslFiles(file);
+            for (int i = 0; i < amountOfESLFilesToExpect; i++) {
+//                System.out.println("Processing ESL file " + (i + 1) + " of " + amountOfESLFilesToExpect + " in " + file.getName());
+                ESLFile eslFile = eslFileReader.parseFile(file, i);
+                FileDate fileDate = eslFileReader.getFileDate(file, i);
+                sdatCache.addESLFile(fileDate, eslFile);
+            }
         });
     }
 

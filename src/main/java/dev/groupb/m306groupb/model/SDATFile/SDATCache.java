@@ -31,7 +31,7 @@ public class SDATCache {
         File[] files = FileReader.getFiles(filesPath);
 
         Arrays.stream(files).parallel().forEach(file -> {
-            SDATFile sdatFile = sdatFileReader.parseFile(file)[0];
+            SDATFile sdatFile = sdatFileReader.parseFile(file);
             FileDate fileDate = sdatFileReader.getFileDate(file);
 
             sdatCache.addSDATFile(fileDate, sdatFile);

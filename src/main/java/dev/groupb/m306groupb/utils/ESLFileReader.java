@@ -3,6 +3,7 @@ package dev.groupb.m306groupb.utils;
 import dev.groupb.m306groupb.model.ESLFile.ESLFile;
 import dev.groupb.m306groupb.model.FileDate;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -16,11 +17,13 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
 public class ESLFileReader implements FileReader<ESLFile> {
-
     @Override
     public FileDate getFileDate(File file) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat(GlobalStuff.ESL_DATE_FORMAT);
+        throw new UnsupportedOperationException();
+    }
 
+    public FileDate getFileDate(File file, int index) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat(GlobalStuff.ESL_DATE_FORMAT);
         try {
             FileDate fileDate = new FileDate();
 
@@ -31,19 +34,15 @@ public class ESLFileReader implements FileReader<ESLFile> {
             doc.getDocumentElement().normalize();
 
             NodeList headerList = doc.getElementsByTagName("Header");
-            for (int i = 0; i < headerList.getLength(); i++) {
-                Node creationDate = headerList.item(i);
-                creationDate.normalize();
-                String created = creationDate.getAttributes().getNamedItem("created").getNodeValue();
-                fileDate.setFileCreationDate(dateFormat.parse(created));
-            }
+            Node creationDate = headerList.item(0);
+            creationDate.normalize();
+            String created = creationDate.getAttributes().getNamedItem("created").getNodeValue();
+            fileDate.setFileCreationDate(dateFormat.parse(created));
 
             NodeList timePeriodList = doc.getElementsByTagName("TimePeriod");
-            for (int j = 0; j < timePeriodList.getLength(); j++) {
-                Node timePeriod = timePeriodList.item(j);
-                String end = timePeriod.getAttributes().getNamedItem("end").getNodeValue();
-                fileDate.setEndDate(dateFormat.parse(end));
-            }
+            Node timePeriod = timePeriodList.item(index);
+            String end = timePeriod.getAttributes().getNamedItem("end").getNodeValue();
+            fileDate.setEndDate(dateFormat.parse(end));
 
             return fileDate;
         } catch (ParserConfigurationException | IOException | SAXException | ParseException e) {
@@ -51,9 +50,28 @@ public class ESLFileReader implements FileReader<ESLFile> {
         }
     }
 
+    public int amountOfEslFiles(File file) {
+        try {
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            Document doc = dBuilder.parse(file);
+
+            doc.getDocumentElement().normalize();
+
+            NodeList timePeriodList = doc.getElementsByTagName("TimePeriod");
+            return timePeriodList.getLength();
+        } catch (ParserConfigurationException | IOException | SAXException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @Override
-    public ESLFile[] parseFile(File file) {
-        double[] obisValues = findValues(file);
+    public ESLFile parseFile(File file) {
+        throw new UnsupportedOperationException();
+    }
+
+    public ESLFile parseFile(File file, int index) {
+        double[] obisValues = findValues(file, index);
         return ESLFile.builder()
                 .fileName(file.getName())
                 .filePath(file.getAbsolutePath())
@@ -70,7 +88,7 @@ public class ESLFileReader implements FileReader<ESLFile> {
      *   1-1:2.8.1 --> Index 2 (Production Hightariff)
      *   1-1:2.8.2 --> Index 3 (Production Lowtariff)
      * */
-    private double[] findValues(File file) {
+    private double[] findValues(File file, int index) {
         double[] obisValues = new double[4];
         try {
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -79,28 +97,24 @@ public class ESLFileReader implements FileReader<ESLFile> {
 
             doc.getDocumentElement().normalize();
 
-
-            NodeList valuerow = doc.getElementsByTagName("ValueRow");
-            for (int i = 0; i < valuerow.getLength(); i++) {
-                Node item = valuerow.item(i);
-                String obis = item.getAttributes().getNamedItem("obis").getNodeValue();
-
+            Element timePeriod = (Element) doc.getElementsByTagName("TimePeriod").item(index);
+            NodeList valueRows = timePeriod.getElementsByTagName("ValueRow");
+            for (int j = 0; j < valueRows.getLength(); j++) {
+                Element valueRow = (Element) valueRows.item(j);
+                String value = valueRow.getAttribute("value");
+                String obis = valueRow.getAttribute("obis");
                 switch (obis) {
                     case "1-1:1.8.1" -> {
-                        String consumptionHighttariff = item.getAttributes().getNamedItem("value").getNodeValue();
-                        obisValues[0] = Double.parseDouble(consumptionHighttariff);
+                        obisValues[0] = Double.parseDouble(value);
                     }
                     case "1-1:1.8.2" -> {
-                        String consumptionLowtariff = item.getAttributes().getNamedItem("value").getNodeValue();
-                        obisValues[1] = Double.parseDouble(consumptionLowtariff);
+                        obisValues[1] = Double.parseDouble(value);
                     }
                     case "1-1:2.8.1" -> {
-                        String productionHightariff = item.getAttributes().getNamedItem("value").getNodeValue();
-                        obisValues[2] = Double.parseDouble(productionHightariff);
+                        obisValues[2] = Double.parseDouble(value);
                     }
                     case "1-1:2.8.2" -> {
-                        String productionLowtariff = item.getAttributes().getNamedItem("value").getNodeValue();
-                        obisValues[3] = Double.parseDouble(productionLowtariff);
+                        obisValues[3] = Double.parseDouble(value);
                     }
                 }
             }

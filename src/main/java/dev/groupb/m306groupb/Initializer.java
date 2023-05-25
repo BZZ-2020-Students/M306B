@@ -16,12 +16,12 @@ public class Initializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        System.out.println("Loading SDAT files...");
-        SDATCache.fillCacheParallel(sdat_files_path);
-        System.out.println("All SDAT files processed and loaded!");
-
         System.out.println("Loading ESL files...");
         ESLCache.fillCacheParallel(esl_files_path);
         System.out.println("All ESL files processed and loaded!");
+
+        System.out.println("Loading SDAT files...");
+        SDATCache.fillCacheParallel(sdat_files_path);
+        System.out.println("All SDAT files processed and loaded!");
     }
 }

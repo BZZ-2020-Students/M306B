@@ -25,7 +25,7 @@ import java.util.TreeSet;
 public class SDATFileReader implements FileReader<SDATFile> {
     @Override
     public FileDate getFileDate(File file) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat(GlobalStuff.XML_DATE_FORMAT);
+        SimpleDateFormat dateFormat = new SimpleDateFormat(GlobalStuff.SDAT_DATE_FORMAT);
 
         try {
             FileDate fileDate = new FileDate();

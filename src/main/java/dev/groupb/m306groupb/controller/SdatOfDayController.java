@@ -39,7 +39,7 @@ public class SdatOfDayController {
         }
 
         SDATCache sdatCache = SDATCache.getInstance();
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(GlobalStuff.XML_DATE_FORMAT);
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(GlobalStuff.SDAT_DATE_FORMAT);
 
         try {
             FileDate fileDate = FileDate.builder()

@@ -15,6 +15,8 @@ import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Objects;
 
 public class ESLFileReader implements FileReader<ESLFile> {
     @Override
@@ -71,7 +73,13 @@ public class ESLFileReader implements FileReader<ESLFile> {
     }
 
     public ESLFile parseFile(File file, int index) {
-        double[] obisValues = findValues(file, index);
+        Double[] obisValues = findValues(file, index);
+
+        // if all values null, return null
+        if (Arrays.stream(obisValues).allMatch(Objects::isNull)) {
+            return null;
+        }
+
         return ESLFile.builder()
                 .fileName(file.getName())
                 .filePath(file.getAbsolutePath())
@@ -88,8 +96,8 @@ public class ESLFileReader implements FileReader<ESLFile> {
      *   1-1:2.8.1 --> Index 2 (Production Hightariff)
      *   1-1:2.8.2 --> Index 3 (Production Lowtariff)
      * */
-    private double[] findValues(File file, int index) {
-        double[] obisValues = new double[4];
+    private Double[] findValues(File file, int index) {
+        Double[] obisValues = new Double[4];
         try {
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();

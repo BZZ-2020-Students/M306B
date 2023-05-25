@@ -10,8 +10,8 @@ public class ESLFile {
     private String fileName;
     @JsonIgnore
     private String filePath;
-    private double highTariffConsumption;
-    private double lowTariffConsumption;
-    private double highTariffProduction;
-    private double lowTariffProduction;
+    private Double highTariffConsumption;
+    private Double lowTariffConsumption;
+    private Double highTariffProduction;
+    private Double lowTariffProduction;
 }

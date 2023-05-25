@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 class FileDateTest {
     @Test
     void testEquals() throws ParseException {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(GlobalStuff.XML_DATE_FORMAT);
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(GlobalStuff.SDAT_DATE_FORMAT);
 
         FileDate fileDate = FileDate.builder().fileCreationDate(null).startDate(null).endDate(null).build();
         FileDate fileDate2 = FileDate.builder().fileCreationDate(null).startDate(null).endDate(null).build();

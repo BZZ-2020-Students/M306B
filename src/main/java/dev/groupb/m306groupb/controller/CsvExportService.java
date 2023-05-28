@@ -1,4 +1,4 @@
-package dev.groupb.m306groupb.model.CSVExporter;
+package dev.groupb.m306groupb.controller;
 
 import dev.groupb.m306groupb.model.FileDate;
 import dev.groupb.m306groupb.model.SDATFile.SDATCache;

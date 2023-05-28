@@ -13,13 +13,12 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Controller
 public class SdatOfDayController {
@@ -33,20 +32,22 @@ public class SdatOfDayController {
 
         try {
             HashMap<FileDate, SDATFile[]> sdatFileHashMap = sdatCache.getSdatFileHashMap();
-            SDATFile[] sdatFiles = sdatFileHashMap.entrySet().stream()
+            Map<FileDate, SDATFile[]> filteredMap = sdatFileHashMap.entrySet().stream()
                     .filter(entry -> !entry.getKey().getStartDate().before(from) && !entry.getKey().getStartDate().after(to))
-                    .flatMap(entry -> Arrays.stream(entry.getValue()))
-                    .toArray(SDATFile[]::new);
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+            List<SDATFileWithDate> fileDateSdatFilesList = filteredMap.entrySet().stream()
+                    .map(entry -> SDATFileWithDate.builder().fileDate(entry.getKey()).SDATFiles(entry.getValue()).build())
+                    .toList();
 
 
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(GlobalStuff.SDAT_DATE_FORMAT);
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.setDateFormat(simpleDateFormat);
+            String json = objectMapper.writeValueAsString(fileDateSdatFilesList);
 
-            // Serialize to json
-            if (foundEntry != null) {
-                ObjectMapper objectMapper = new ObjectMapper();
-                objectMapper.setDateFormat(simpleDateFormat);
-                model.addAttribute("sdatFiles", objectMapper.writeValueAsString(SDATFileWithDate.builder().SDATFiles(foundEntry.getValue()).fileDate(foundEntry.getKey()).build()));
-            }
-        } catch (ParseException | JsonProcessingException e) {
+            model.addAttribute("sdatFiles", json);
+        } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
 

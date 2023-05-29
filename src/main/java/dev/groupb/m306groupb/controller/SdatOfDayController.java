@@ -7,61 +7,49 @@ import dev.groupb.m306groupb.model.SDATFile.SDATCache;
 import dev.groupb.m306groupb.model.SDATFile.SDATFile;
 import dev.groupb.m306groupb.model.SDATFile.SDATFileWithDate;
 import dev.groupb.m306groupb.utils.GlobalStuff;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Controller
 public class SdatOfDayController {
-    @GetMapping("/sdat-day")
-    public String greeting(
-            @RequestParam(name = "startDate", required = false, defaultValue = "NULL") String startDate,
-            @RequestParam(name = "endDate", required = false, defaultValue = "NULL") String endDate,
-            @RequestParam(name = "creationDate", required = false, defaultValue = "NULL") String creationDate,
+    @GetMapping("/sdat-view")
+    public String sdatView(
+            @RequestParam("from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date from,
+            @RequestParam("to") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date to,
             Model model
     ) {
-        if (startDate.equals("NULL")) {
-            startDate = null;
-        }
-        if (endDate.equals("NULL")) {
-            endDate = null;
-        }
-        if (creationDate.equals("NULL")) {
-            creationDate = null;
-        }
-        if (startDate == null && endDate == null && creationDate == null) {
-            return "sdat_of_day"; // TODO: Show error message
-        }
-
         SDATCache sdatCache = SDATCache.getInstance();
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(GlobalStuff.SDAT_DATE_FORMAT);
 
         try {
-            FileDate fileDate = FileDate.builder()
-                    .startDate(startDate != null ? simpleDateFormat.parse(startDate) : null)
-                    .endDate(endDate != null ? simpleDateFormat.parse(endDate) : null)
-                    .fileCreationDate(creationDate != null ? simpleDateFormat.parse(creationDate) : null)
-                    .build();
+            HashMap<FileDate, SDATFile[]> sdatFileHashMap = sdatCache.getSdatFileHashMap();
+            Map<FileDate, SDATFile[]> filteredMap = sdatFileHashMap.entrySet().stream()
+                    .filter(entry -> !entry.getKey().getStartDate().before(from) && !entry.getKey().getStartDate().after(to))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-            Map.Entry<FileDate, SDATFile[]> foundEntry = sdatCache.getSdatFileHashMap().entrySet().stream()
-                    .filter(entry -> fileDate.getStartDate() == null || entry.getKey().getStartDate().equals(fileDate.getStartDate()))
-                    .filter(entry -> fileDate.getEndDate() == null || entry.getKey().getEndDate().equals(fileDate.getEndDate()))
-                    .filter(entry -> fileDate.getFileCreationDate() == null || entry.getKey().getFileCreationDate().equals(fileDate.getFileCreationDate()))
-                    .findFirst()
-                    .orElse(null);
+            List<SDATFileWithDate> fileDateSdatFilesList = new java.util.ArrayList<>(filteredMap.entrySet().stream()
+                    .map(entry -> SDATFileWithDate.builder().fileDate(entry.getKey()).SDATFiles(entry.getValue()).build())
+                    .toList());
 
-            // Serialize to json
-            if (foundEntry != null) {
-                ObjectMapper objectMapper = new ObjectMapper();
-                objectMapper.setDateFormat(simpleDateFormat);
-                model.addAttribute("sdatFiles", objectMapper.writeValueAsString(SDATFileWithDate.builder().SDATFiles(foundEntry.getValue()).fileDate(foundEntry.getKey()).build()));
-            }
-        } catch (ParseException | JsonProcessingException e) {
+            // sort by start date
+            fileDateSdatFilesList.sort(SDATFileWithDate::compareTo);
+
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(GlobalStuff.SDAT_DATE_FORMAT);
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.setDateFormat(simpleDateFormat);
+            String json = objectMapper.writeValueAsString(fileDateSdatFilesList);
+
+            model.addAttribute("sdatFiles", json);
+        } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
 

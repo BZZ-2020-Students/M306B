@@ -29,7 +29,7 @@ interface Observation {
 
 interface SdatFile {
     fileName: string;
-    fileType: FileType;
+    sdatfileType: FileType;
     resolution: Resolution;
     measureUnit: MeasureUnit;
     observations: Observation[];
@@ -37,38 +37,37 @@ interface SdatFile {
 
 interface SdatWithFileDate {
     fileDate: FileDate;
-    sdatFiles: SdatFile[];
+    sdatfiles: SdatFile[];
+}
+
+interface ChartData {
+    label: FileType,
+    data: number[]
 }
 
 function SDATFileDayChart(sdatFilesRaw: any) {
     let jsonData: SdatWithFileDate[] = JSON.parse(sdatFilesRaw);
-    console.log(jsonData)
-
-    if (!Array.isArray(jsonData)) {
-        console.error('jsonData is not an array');
-        return;
-    }
 
     const fileTypes: FileType[] = [];
     for (let i = 0; i < jsonData.length; i++) {
         const sdatWithFileDate = jsonData[i];
-        for (let j = 0; j < sdatWithFileDate.sdatFiles.length; j++) {
-            const sdatFile = sdatWithFileDate.sdatFiles[j];
-            if (fileTypes.indexOf(sdatFile.fileType) === -1) {
-                fileTypes.push(sdatFile.fileType);
+        for (let j = 0; j < sdatWithFileDate.sdatfiles.length; j++) {
+            const sdatFile = sdatWithFileDate.sdatfiles[j];
+            if (fileTypes.indexOf(sdatFile.sdatfileType) === -1) {
+                fileTypes.push(sdatFile.sdatfileType);
             }
         }
     }
 
-    const datasets = [];
+    const datasets: ChartData[] = [];
     for (let i = 0; i < fileTypes.length; i++) {
         const fileType = fileTypes[i];
         const data: number[] = [];
         for (let j = 0; j < jsonData.length; j++) {
             const sdatWithFileDate = jsonData[j];
-            for (let k = 0; k < sdatWithFileDate.sdatFiles.length; k++) {
-                const sdatFile = sdatWithFileDate.sdatFiles[k];
-                if (sdatFile.fileType === fileType) {
+            for (let k = 0; k < sdatWithFileDate.sdatfiles.length; k++) {
+                const sdatFile = sdatWithFileDate.sdatfiles[k];
+                if (sdatFile.sdatfileType === fileType) {
                     for (let l = 0; l < sdatFile.observations.length; l++) {
                         const observation = sdatFile.observations[l];
                         data.push(observation.volume);
@@ -82,28 +81,54 @@ function SDATFileDayChart(sdatFilesRaw: any) {
         });
     }
 
-    const startDate = jsonData[0].fileDate.startDate
-    const resolution = jsonData[0].sdatFiles[0].resolution;
     let dates: string[] = [];
     for (let i = 0; i < jsonData.length; i++) {
         const sdatWithFileDate = jsonData[i];
-        for (let j = 0; j < sdatWithFileDate.sdatFiles.length; j++) {
-            const sdatFile = sdatWithFileDate.sdatFiles[j];
-            for (let k = 0; k < sdatFile.observations.length; k++) {
-                const observation = sdatFile.observations[k];
-                let minute = (observation.position - 1) * resolution.resolution;
-                let newDate = new Date(startDate)
-                newDate.setMinutes(newDate.getMinutes() + minute)
+        const startDate = sdatWithFileDate.fileDate.startDate;
 
-                dates.push(newDate.toLocaleString())
+        let longest_sdat_file = undefined;
+        for (let j = 0; j < sdatWithFileDate.sdatfiles.length; j++) {
+            const sdatFile = sdatWithFileDate.sdatfiles[j];
+            if (longest_sdat_file === undefined || sdatFile.observations.length > longest_sdat_file.observations.length) {
+                longest_sdat_file = sdatFile;
             }
         }
+
+        for (let j = 0; j < longest_sdat_file.observations.length; j++) {
+            const resolution = longest_sdat_file.resolution;
+            const observation = longest_sdat_file.observations[j];
+            let minute = (observation.position - 1) * resolution.resolution;
+            let newDate = new Date(startDate);
+            newDate.setMinutes(newDate.getMinutes() + minute)
+
+            dates.push(newDate.toLocaleString())
+        }
     }
+
+    console.log("datasets", datasets)
+    console.log("amount dates", dates.length)
 
     const data = {
         labels: dates,
         datasets: datasets
     }
+
+    const zoomOptions = {
+        pan: {
+            enabled: true,
+            mode: 'x',
+            modifierKey: 'ctrl',
+        },
+        zoom: {
+            mode: 'x',
+            drag: {
+                enabled: true,
+                borderColor: 'rgb(54, 162, 235)',
+                borderWidth: 1,
+                backgroundColor: 'rgba(54, 162, 235, 0.3)'
+            }
+        }
+    };
 
     // @ts-ignore
     new Chart(
@@ -111,6 +136,11 @@ function SDATFileDayChart(sdatFilesRaw: any) {
         {
             type: 'line',
             data: data,
+            options: {
+                plugins: {
+                    zoom: zoomOptions,
+                }
+            }
         }
     );
 }

@@ -36,10 +36,12 @@ public class SdatOfDayController {
                     .filter(entry -> !entry.getKey().getStartDate().before(from) && !entry.getKey().getStartDate().after(to))
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-            List<SDATFileWithDate> fileDateSdatFilesList = filteredMap.entrySet().stream()
+            List<SDATFileWithDate> fileDateSdatFilesList = new java.util.ArrayList<>(filteredMap.entrySet().stream()
                     .map(entry -> SDATFileWithDate.builder().fileDate(entry.getKey()).SDATFiles(entry.getValue()).build())
-                    .toList();
+                    .toList());
 
+            // sort by start date
+            fileDateSdatFilesList.sort(SDATFileWithDate::compareTo);
 
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat(GlobalStuff.SDAT_DATE_FORMAT);
             ObjectMapper objectMapper = new ObjectMapper();

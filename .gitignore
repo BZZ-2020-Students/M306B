@@ -141,3 +141,4 @@ buildNumber.properties
 *.js
 
 !src/main/resources/static/js/chartjs-plugin-zoom.min.js
+!src/main/resources/static/js/chartjs.umd.js

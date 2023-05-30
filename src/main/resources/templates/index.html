@@ -5,11 +5,10 @@
     <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
     <link rel="stylesheet" th:href="@{/styles/style.css}"/>
 </head>
-<script crossorigin="anonymous"
-        integrity="sha512-CMF3tQtjOoOJoOKlsS7/2loJlkyctwzSoDK/S40iAB+MqWSaf50uObGQSk5Ny/gfRhRCjNLvoxuCvdnERU4WGg=="
-        referrerpolicy="no-referrer" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.3.0/chart.umd.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
+<script th:src="@{/js/chartjs.umd.js}" type="text/javascript"></script>
 <script th:src="@{/js/chartjs-plugin-zoom.min.js}" type="text/javascript"></script>
+<script th:src="@{/js/Global.js}" type="text/javascript"></script>
 <script th:src="@{/js/SetupHomeScreen.js}" type="text/javascript"></script>
 <script th:src="@{/js/SDATFileDayChart.js}" type="text/javascript"></script>
 <body>
@@ -23,5 +22,6 @@
     let sdatFiles = /*[[${sdatFiles}]]*/ "[]";
     /*]]>*/
 
+    setup();
     SDATFileDayChart(sdatFiles);
 </script>

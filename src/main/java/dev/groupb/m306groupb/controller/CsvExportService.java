@@ -52,7 +52,7 @@ public class CsvExportService {
         for (SDATFile[] files : filesInRange.values()) {
             for (SDATFile file : files) {
                 csvContent.append(file.getFileName()).append(",");
-                csvContent.append(file.getFileType()).append(",");
+                csvContent.append(file.getSDATFileType()).append(",");
                 csvContent.append(file.getResolution()).append("\n");
             }
         }
@@ -71,7 +71,7 @@ public class CsvExportService {
         return ResponseEntity.ok().build();
     }
 
-    private boolean isWithinTimeRange(FileDate fileDate, Date start, Date end) {
+    public boolean isWithinTimeRange(FileDate fileDate, Date start, Date end) {
         return !fileDate.getStartDate().after(end) && !fileDate.getStartDate().before(start);
     }
 }

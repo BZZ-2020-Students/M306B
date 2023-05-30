@@ -37,6 +37,9 @@ public class IndexController {
             Date earliestDate = (from == null) ? fileDateSdatFilesList.get(0).getFileDate().getStartDate() : from;
             Date latestDate = (to == null) ? fileDateSdatFilesList.get(fileDateSdatFilesList.size() - 1).getFileDate().getStartDate() : to;
 
+            System.out.println("earliestDate = " + earliestDate);
+            System.out.println("latestDate = " + latestDate);
+
             // filter the list
             fileDateSdatFilesList = new java.util.ArrayList<>(fileDateSdatFilesList.stream()
                     .filter(sdatFileWithDate -> !sdatFileWithDate.getFileDate().getStartDate().before(earliestDate) && !sdatFileWithDate.getFileDate().getStartDate().after(latestDate))
@@ -51,7 +54,7 @@ public class IndexController {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-        
+
         return "index";
     }
 }

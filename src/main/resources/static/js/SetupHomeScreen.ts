@@ -1,4 +1,4 @@
-import {BASE_URL} from "./Global";
+import {BASE_URL} from "./Global.js";
 
 async function setup() {
     await loadDiagramTypes();

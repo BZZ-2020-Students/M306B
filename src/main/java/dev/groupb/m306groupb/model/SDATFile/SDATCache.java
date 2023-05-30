@@ -5,7 +5,6 @@ import dev.groupb.m306groupb.utils.FileReader;
 import dev.groupb.m306groupb.utils.SDATFileReader;
 import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.io.File;
 import java.util.Arrays;
@@ -15,8 +14,9 @@ import java.util.HashMap;
 public class SDATCache {
     // Lombok ignore setter and getter
     @Getter(AccessLevel.NONE)
-    @Setter(AccessLevel.NONE)
     private static SDATCache instance;
+
+    private static boolean ready;
 
     private final HashMap<FileDate, SDATFile[]> sdatFileHashMap = new HashMap<>();
 
@@ -36,6 +36,8 @@ public class SDATCache {
 
             sdatCache.addSDATFile(fileDate, sdatFile);
         });
+
+        ready = true;
     }
 
     public static void fillCacheSequential(String filesPath) {
@@ -51,6 +53,8 @@ public class SDATCache {
 
             sdatCache.addSDATFile(fileDate, sdatFile);
         }
+
+        ready = true;
     }
 
     public static SDATCache getInstance() {
@@ -59,6 +63,10 @@ public class SDATCache {
         }
 
         return instance;
+    }
+
+    public static boolean isReady() {
+        return ready;
     }
 
     public void addSDATFile(FileDate fileDate, SDATFile sdatFile) {

@@ -1,6 +1,7 @@
 package dev.groupb.m306groupb.model.ESLFile;
 
 import dev.groupb.m306groupb.model.FileDate;
+import dev.groupb.m306groupb.model.SDATFile.SDATFile;
 import dev.groupb.m306groupb.utils.ESLFileReader;
 import dev.groupb.m306groupb.utils.FileReader;
 import lombok.AccessLevel;
@@ -53,5 +54,13 @@ public class ESLCache {
 
     public void addESLFile(FileDate fileDate, ESLFile eslFile) {
         eslFileMap.put(fileDate, eslFile);
+
+        ESLFile existing = eslFileMap.get(fileDate);
+        if (existing != null) {
+            // if the existing has something null, and the new one has in that field a value, replace it with the new one (so its not null)
+
+        } else {
+            sdatFileHashMap.put(fileDate, new SDATFile[]{sdatFile});
+        }
     }
 }

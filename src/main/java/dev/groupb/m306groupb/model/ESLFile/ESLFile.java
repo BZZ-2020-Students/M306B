@@ -14,4 +14,19 @@ public class ESLFile {
     private Double lowTariffConsumption;
     private Double highTariffProduction;
     private Double lowTariffProduction;
+
+    public void fillNullValues(ESLFile filler) {
+        if (this.highTariffConsumption == 0) {
+            this.highTariffConsumption = filler.highTariffConsumption;
+        }
+        if (this.lowTariffConsumption == 0) {
+            this.lowTariffConsumption = filler.lowTariffConsumption;
+        }
+        if (this.highTariffProduction == 0) {
+            this.highTariffProduction = filler.highTariffProduction;
+        }
+        if (this.lowTariffProduction == 0) {
+            this.lowTariffProduction = filler.lowTariffProduction;
+        }
+    }
 }

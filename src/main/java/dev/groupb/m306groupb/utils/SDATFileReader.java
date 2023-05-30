@@ -1,7 +1,7 @@
 package dev.groupb.m306groupb.utils;
 
-import dev.groupb.m306groupb.enums.FileType;
 import dev.groupb.m306groupb.enums.MeasureUnit;
+import dev.groupb.m306groupb.enums.SDATFileType;
 import dev.groupb.m306groupb.enums.Unit;
 import dev.groupb.m306groupb.model.FileDate;
 import dev.groupb.m306groupb.model.Resolution;
@@ -25,7 +25,7 @@ import java.util.TreeSet;
 public class SDATFileReader implements FileReader<SDATFile> {
     @Override
     public FileDate getFileDate(File file) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat(GlobalStuff.XML_DATE_FORMAT);
+        SimpleDateFormat dateFormat = new SimpleDateFormat(GlobalStuff.SDAT_DATE_FORMAT);
 
         try {
             FileDate fileDate = new FileDate();
@@ -81,7 +81,7 @@ public class SDATFileReader implements FileReader<SDATFile> {
         return SDATFile.builder()
                 .fileName(file.getName())
                 .filePath(file.getAbsolutePath())
-                .fileType(findFileType(file))
+                .SDATFileType(findFileType(file))
                 .resolution(findResolution(file))
                 .measureUnit(findMeasureUnit(file))
                 .observations(findObservations(file))
@@ -206,7 +206,7 @@ public class SDATFileReader implements FileReader<SDATFile> {
         }
     }
 
-    private FileType findFileType(File file) {
+    private SDATFileType findFileType(File file) {
         try {
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
@@ -218,9 +218,9 @@ public class SDATFileReader implements FileReader<SDATFile> {
             NodeList production = doc.getElementsByTagName("rsm:ProductionMeteringPoint");
 
             if (consumption.getLength() > 0)
-                return FileType.Consumption;
+                return SDATFileType.Consumption;
             else if (production.getLength() > 0)
-                return FileType.Production;
+                return SDATFileType.Production;
 
             throw new RuntimeException("File type not found");
         } catch (ParserConfigurationException | IOException | SAXException e) {

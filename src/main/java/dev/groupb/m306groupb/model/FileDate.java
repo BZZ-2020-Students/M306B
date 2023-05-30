@@ -11,8 +11,13 @@ import java.util.Date;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class FileDate {
+public class FileDate implements Comparable<FileDate> {
     private Date fileCreationDate;
     private Date startDate;
     private Date endDate;
+
+    @Override
+    public int compareTo(FileDate o) {
+        return this.startDate.compareTo(o.startDate);
+    }
 }

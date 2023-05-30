@@ -30,7 +30,7 @@ public class FileUploadController {
         this.storageService = storageService;
     }
 
-    @GetMapping("/")
+    @GetMapping("/files/list")
     public String listUploadedFiles(Model model) {
         model.addAttribute("SDATFiles", storageService.loadAll(FileType.SDAT).map(
                         path -> MvcUriComponentsBuilder.fromMethodName(FileUploadController.class,

@@ -1,7 +1,7 @@
 package dev.groupb.m306groupb.utils;
 
-import dev.groupb.m306groupb.enums.EconomicActivity;
 import dev.groupb.m306groupb.enums.MeasureUnit;
+import dev.groupb.m306groupb.enums.EconomicActivity;
 import dev.groupb.m306groupb.enums.Unit;
 import dev.groupb.m306groupb.model.FileDate;
 import dev.groupb.m306groupb.model.Resolution;
@@ -81,7 +81,7 @@ public class SDATFileReader implements FileReader<SDATFile> {
         return SDATFile.builder()
                 .fileName(file.getName())
                 .filePath(file.getAbsolutePath())
-                .SDATFileType(findFileType(file))
+                .economicActivity(findFileType(file))
                 .resolution(findResolution(file))
                 .measureUnit(findMeasureUnit(file))
                 .observations(findObservations(file))

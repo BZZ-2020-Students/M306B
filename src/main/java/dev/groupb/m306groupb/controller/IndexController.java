@@ -17,31 +17,33 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Controller
-public class SdatOfDayController {
-    @GetMapping("/sdat-view")
-    public String sdatView(
-            @RequestParam("from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date from,
-            @RequestParam("to") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date to,
-            Model model
-    ) {
+public class IndexController {
+    @GetMapping("/")
+    public String load_index(@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date from,
+                             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date to, Model model) {
         SDATCache sdatCache = SDATCache.getInstance();
 
         try {
             HashMap<FileDate, SDATFile[]> sdatFileHashMap = sdatCache.getSdatFileHashMap();
-            Map<FileDate, SDATFile[]> filteredMap = sdatFileHashMap.entrySet().stream()
-                    .filter(entry -> !entry.getKey().getStartDate().before(from) && !entry.getKey().getStartDate().after(to))
-                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-
-            List<SDATFileWithDate> fileDateSdatFilesList = new java.util.ArrayList<>(filteredMap.entrySet().stream()
+            // sort by start date
+            List<SDATFileWithDate> fileDateSdatFilesList = new java.util.ArrayList<>(sdatFileHashMap.entrySet().stream()
                     .map(entry -> SDATFileWithDate.builder().fileDate(entry.getKey()).SDATFiles(entry.getValue()).build())
                     .toList());
-
-            // sort by start date
             fileDateSdatFilesList.sort(SDATFileWithDate::compareTo);
+
+            // get the earliest date and the latest date
+            Date earliestDate = (from == null) ? fileDateSdatFilesList.get(0).getFileDate().getStartDate() : from;
+            Date latestDate = (to == null) ? fileDateSdatFilesList.get(fileDateSdatFilesList.size() - 1).getFileDate().getStartDate() : to;
+
+            System.out.println("earliestDate = " + earliestDate);
+            System.out.println("latestDate = " + latestDate);
+
+            // filter the list
+            fileDateSdatFilesList = new java.util.ArrayList<>(fileDateSdatFilesList.stream()
+                    .filter(sdatFileWithDate -> !sdatFileWithDate.getFileDate().getStartDate().before(earliestDate) && !sdatFileWithDate.getFileDate().getStartDate().after(latestDate))
+                    .toList());
 
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat(GlobalStuff.SDAT_DATE_FORMAT);
             ObjectMapper objectMapper = new ObjectMapper();
@@ -53,6 +55,6 @@ public class SdatOfDayController {
             throw new RuntimeException(e);
         }
 
-        return "sdat_of_day";
+        return "index";
     }
 }

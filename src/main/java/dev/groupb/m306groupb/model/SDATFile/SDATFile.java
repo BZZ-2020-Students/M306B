@@ -15,7 +15,7 @@ public class SDATFile {
     private String fileName;
     @JsonIgnore
     private String filePath;
-    private EconomicActivity SDATFileType;
+    private EconomicActivity economicActivity;
     private Resolution resolution;
     private MeasureUnit measureUnit;
     private SortedSet<Observation> observations;

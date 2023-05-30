@@ -6,22 +6,26 @@
     <link rel="stylesheet" th:href="@{/styles/style.css}"/>
 </head>
 <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
-<script th:src="@{/js/chartjs.umd.js}" type="text/javascript"></script>
-<script th:src="@{/js/chartjs-plugin-zoom.min.js}" type="text/javascript"></script>
-<script th:src="@{/js/Global.js}" type="text/javascript"></script>
-<script th:src="@{/js/SetupHomeScreen.js}" type="text/javascript"></script>
-<script th:src="@{/js/SDATFileDayChart.js}" type="text/javascript"></script>
+<script th:src="@{/js/chartjs.umd.js}" type="module"></script>
+<script th:src="@{/js/chartjs-plugin-zoom.min.js}" type="module"></script>
+<script th:src="@{/js/Global.js}" type="module"></script>
+<script th:src="@{/js/SetupHomeScreen.js}" type="module"></script>
+<script th:src="@{/js/SDATFileDayChart.js}" type="module"></script>
 <body>
 <div style="width: 100%;">
     <canvas id="sdat-file-chart"></canvas>
 </div>
 </body>
 </html>
-<script th:inline="javascript">
+<script th:inline="javascript" type="module">
     /*<![CDATA[*/
+    import {setupHomeScreen} from "../static/js/SetupHomeScreen";
+    import {SDATFileDayChart} from "../static/js/SDATFileDayChart";
+
     let sdatFiles = /*[[${sdatFiles}]]*/ "[]";
     /*]]>*/
 
-    setup();
+    setupHomeScreen();
     SDATFileDayChart(sdatFiles);
 </script>
+

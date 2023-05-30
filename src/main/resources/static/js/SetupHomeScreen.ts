@@ -1,6 +1,6 @@
 import {BASE_URL} from "./Global.js";
 
-async function setup() {
+export async function setupHomeScreen() {
     await loadDiagramTypes();
 }
 

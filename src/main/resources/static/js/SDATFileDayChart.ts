@@ -1,3 +1,4 @@
+// @ts-ignore
 import {Chart} from './chartjs.umd.js';
 
 enum FileType {
@@ -47,7 +48,7 @@ interface ChartData {
     data: number[]
 }
 
-function SDATFileDayChart(sdatFilesRaw: any) {
+export function SDATFileDayChart(sdatFilesRaw: any) {
     let jsonData: SdatWithFileDate[] = JSON.parse(sdatFilesRaw);
 
     const fileTypes: FileType[] = [];

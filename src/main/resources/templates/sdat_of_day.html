@@ -12,8 +12,15 @@
 <script th:src="@{/js/chartjs-plugin-zoom.min.js}" type="text/javascript"></script>
 <script th:src="@{/js/SDATFileDayChart.js}" type="text/javascript"></script>
 <body>
-<div style="width: 100%;">
-    <canvas id="sdat-file-chart"></canvas>
+<div style="width: 95%; height: 100%; margin: auto">
+    <div>
+        <canvas id="sdat-file-chart"></canvas>
+        <hr>
+    </div>
+    <div id="footer">
+        <button onclick="resetZoomChart()">Reset zoom</button>
+    </div>
+
 </div>
 </body>
 </html>

@@ -45,6 +45,8 @@ interface ChartData {
     data: number[]
 }
 
+let sdatFileChart = null
+
 function SDATFileDayChart(sdatFilesRaw: any) {
     let jsonData: SdatWithFileDate[] = JSON.parse(sdatFilesRaw);
 
@@ -105,9 +107,6 @@ function SDATFileDayChart(sdatFilesRaw: any) {
         }
     }
 
-    console.log("datasets", datasets)
-    console.log("amount dates", dates.length)
-
     const data = {
         labels: dates,
         datasets: datasets
@@ -131,7 +130,7 @@ function SDATFileDayChart(sdatFilesRaw: any) {
     };
 
     // @ts-ignore
-    new Chart(
+     sdatFileChart = new Chart(
         document.getElementById('sdat-file-chart'),
         {
             type: 'line',
@@ -143,5 +142,10 @@ function SDATFileDayChart(sdatFilesRaw: any) {
             }
         }
     );
+
+
+}
+function resetZoomChart() {
+    sdatFileChart.resetZoom()
 }
 

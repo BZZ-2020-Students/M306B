@@ -13,9 +13,7 @@ public class GetDiagramTypes {
         public ResponseEntity<String[]> getDiagramTypes() {
             ArrayList<String> diagramTypes = new ArrayList<>();
             for (DiagramTypes diagramType : DiagramTypes.values()) {
-                // to string -> to lowercase -> replace underscore with space -> capitalize first letter
-                String replace = diagramType.toString().toLowerCase().replace("_", " ");
-                diagramTypes.add(replace.substring(0, 1).toUpperCase() + replace.substring(1));
+                diagramTypes.add(diagramType.toString());
             }
 
             return ResponseEntity.ok().body(diagramTypes.toArray(new String[0]));

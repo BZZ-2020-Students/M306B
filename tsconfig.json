@@ -1,8 +1,12 @@
 {
   "compilerOptions": {
-    "target": "es5",
     "module": "es6",
+    "target": "es5",
     "strict": false,
-    "esModuleInterop": true
-  }
+    "esModuleInterop": true,
+    "moduleResolution": "Node",
+  },
+  "exclude": [
+    "node_modules"
+  ]
 }

@@ -1,16 +1,15 @@
 import {BASE_URL} from "./Global.js";
 
-export async function setupHomeScreen() {
-    await loadDiagramTypes();
+setupHomeScreen().then(r => console.log("result",r));
+
+async function setupHomeScreen() {
+    return loadDiagramTypes();
 }
 
 async function loadDiagramTypes() {
     const fetchUrl = `${BASE_URL}/diagramTypes`;
-    console.log(fetchUrl);
+    console.log("fetchUrl",fetchUrl);
     const response = await fetch(`${BASE_URL}/diagramTypes`);
 
-    const diagramTypes = await response.json();
-    console.log(diagramTypes);
-
-    return diagramTypes;
+    return await response.json();
 }

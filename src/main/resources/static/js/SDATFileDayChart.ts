@@ -1,6 +1,3 @@
-// @ts-ignore
-import {Chart} from './chartjs.umd.js';
-
 enum FileType {
     Consumption = "Consumption",
     Production = "Production"
@@ -133,13 +130,16 @@ export function SDATFileDayChart(sdatFilesRaw: any) {
         }
     };
 
+
+    // @ts-ignore
     new Chart(
-        document.getElementById('sdat-file-chart'),
+        document.getElementById('sdat-file-chart') as HTMLCanvasElement,
         {
             type: 'line',
             data: data,
             options: {
                 plugins: {
+                    // @ts-ignore
                     zoom: zoomOptions,
                 }
             }

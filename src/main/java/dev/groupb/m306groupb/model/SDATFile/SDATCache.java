@@ -8,7 +8,7 @@ import lombok.Getter;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Getter
 public class SDATCache {
@@ -18,7 +18,7 @@ public class SDATCache {
 
     private static boolean ready;
 
-    private final HashMap<FileDate, SDATFile[]> sdatFileHashMap = new HashMap<>();
+    private final ConcurrentHashMap<FileDate, SDATFile[]> sdatFileHashMap = new ConcurrentHashMap<>();
 
     private SDATCache() {
     }

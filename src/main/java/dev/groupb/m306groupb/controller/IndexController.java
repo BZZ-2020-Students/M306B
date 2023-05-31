@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Controller
 public class IndexController {
@@ -26,22 +26,17 @@ public class IndexController {
         SDATCache sdatCache = SDATCache.getInstance();
 
         if (SDATCache.isReady()) {
-
             try {
-                HashMap<FileDate, SDATFile[]> sdatFileHashMap = sdatCache.getSdatFileHashMap();
-                System.out.println("sdatFileHashMap = " + sdatFileHashMap.size());
+                ConcurrentHashMap<FileDate, SDATFile[]> sdatFileHashMap = sdatCache.getSdatFileHashMap();
                 // sort by start date
                 List<SDATFileWithDate> fileDateSdatFilesList = new java.util.ArrayList<>(sdatFileHashMap.entrySet().stream()
                         .map(entry -> SDATFileWithDate.builder().fileDate(entry.getKey()).SDATFiles(entry.getValue()).build())
                         .toList());
                 fileDateSdatFilesList.sort(SDATFileWithDate::compareTo);
 
-                // get the earliest date and the latest date
+                // get the earliest date and the latest date if they aren't specified in the request
                 Date earliestDate = (from == null) ? fileDateSdatFilesList.get(0).getFileDate().getStartDate() : from;
                 Date latestDate = (to == null) ? fileDateSdatFilesList.get(fileDateSdatFilesList.size() - 1).getFileDate().getStartDate() : to;
-
-                System.out.println("earliestDate = " + earliestDate);
-                System.out.println("latestDate = " + latestDate);
 
                 // filter the list
                 fileDateSdatFilesList = new java.util.ArrayList<>(fileDateSdatFilesList.stream()

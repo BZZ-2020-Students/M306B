@@ -8,7 +8,6 @@
 <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
 <script th:src="@{/js/chartjs.umd.js}" type="module"></script>
 <script th:src="@{/js/chartjs-plugin-zoom.min.js}" type="module"></script>
-<script th:src="@{/js/Global.js}" type="module"></script>
 <script th:src="@{/js/SetupHomeScreen.js}" type="module"></script>
 <script th:src="@{/js/SDATFileDayChart.js}" type="module"></script>
 <body>
@@ -17,15 +16,9 @@
 </div>
 </body>
 </html>
-<script th:inline="javascript" type="module">
+<script th:inline="javascript">
     /*<![CDATA[*/
-    import {setupHomeScreen} from "../static/js/SetupHomeScreen";
-    import {SDATFileDayChart} from "../static/js/SDATFileDayChart";
-
     let sdatFiles = /*[[${sdatFiles}]]*/ "[]";
     /*]]>*/
-
-    setupHomeScreen();
-    SDATFileDayChart(sdatFiles);
 </script>
 

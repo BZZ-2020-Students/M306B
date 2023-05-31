@@ -13,14 +13,6 @@ function setupHomeScreen() {
             option.text = diagramType.charAt(0).toUpperCase() + diagramType.slice(1).toLowerCase();
             diagramTypeSelect.appendChild(option);
         });
-
-        // go through all options, select "Usage" by default
-        for (let i = 0; i < diagramTypeSelect.options.length; i++) {
-            if (diagramTypeSelect.options[i].value.toLowerCase() === "usage") {
-                diagramTypeSelect.selectedIndex = i;
-                break;
-            }
-        }
     });
 }
 

@@ -1,31 +1,36 @@
 import {BASE_URL} from "./Global.js";
 import {SDATFileDayChart} from "./SDATFileDayChart.js";
 
-export function setupHomeScreen(chartType: string, data: []) {
+interface ChartType {
+    priority: number;
+    name: string;
+    value: string;
+}
+
+export function setupHomeScreen(chartType: ChartType, data: []) {
     getDiagramTypes().then(r => {
         const diagramTypes = r;
 
         const diagramTypeSelect = document.getElementById("chart-selection-dropdown") as HTMLSelectElement;
         diagramTypes.forEach(diagramType => {
             const option = document.createElement("option");
-            option.value = diagramType;
-            option.text = diagramType.charAt(0).toUpperCase() + diagramType.slice(1).toLowerCase();
+            option.value = diagramType.value;
+            option.text = diagramType.name.charAt(0).toUpperCase() + diagramType.name.slice(1).toLowerCase();
             diagramTypeSelect.appendChild(option);
 
-            console.log(diagramType, chartType)
-            if (diagramType === chartType) {
+            if (diagramType.value === chartType.value) {
                 option.selected = true;
             }
         });
     });
 
-    switch (chartType) {
+    switch (chartType.value) {
         case "USAGE": {
             SDATFileDayChart(data)
             break;
         }
         case "METER": {
-            console.log("Unsupported chart type: " + chartType)
+            console.log("Unsupported chart type: " + JSON.stringify(chartType))
             break;
         }
     }
@@ -34,5 +39,5 @@ export function setupHomeScreen(chartType: string, data: []) {
 async function getDiagramTypes() {
     const response = await fetch(`${BASE_URL}/diagramTypes`);
 
-    return await response.json() as string[];
+    return await response.json() as ChartType[];
 }

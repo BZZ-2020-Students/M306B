@@ -52,9 +52,6 @@
         urlParams.set('to', to);
     }
 
-    console.log("from", from)
-    console.log("to", to)
-
     document.getElementById('fromDate').value = from;
     document.getElementById('toDate').value = to;
 
@@ -71,6 +68,6 @@
     import {setupHomeScreen} from "./js/SetupHomeScreen.js";
 
     let data = (sdatFiles !== undefined) ? sdatFiles : meterFiles;
-    setupHomeScreen(chartType, data);
+    setupHomeScreen(JSON.parse(chartType), data);
 </script>
 

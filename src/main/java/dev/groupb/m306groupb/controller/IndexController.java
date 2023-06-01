@@ -27,7 +27,7 @@ public class IndexController {
                              @RequestParam(required = false) String type,
                              Model model) {
         DiagramTypes diagramType = DiagramTypes.fromString(type);
-        model.addAttribute("chartType", diagramType.toString());
+        model.addAttribute("chartType", DiagramTypes.toJson(diagramType));
 
         switch (diagramType) {
             case USAGE -> {

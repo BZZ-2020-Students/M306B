@@ -45,7 +45,7 @@ interface ChartData {
     data: number[]
 }
 
-export function SDATFileDayChart(sdatFilesRaw: any) {
+function SDATFileDayChart(sdatFilesRaw: any) {
     let jsonData: SdatWithFileDate[] = JSON.parse(sdatFilesRaw);
 
     const fileTypes: FileType[] = [];
@@ -139,7 +139,6 @@ export function SDATFileDayChart(sdatFilesRaw: any) {
             data: data,
             options: {
                 plugins: {
-                    // @ts-ignore
                     zoom: zoomOptions,
                 }
             }

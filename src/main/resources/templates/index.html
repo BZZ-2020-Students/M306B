@@ -6,10 +6,10 @@
     <link rel="stylesheet" th:href="@{/styles/style.css}"/>
 </head>
 <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
-<script th:src="@{/js/chartjs.umd.js}" type="module"></script>
-<script th:src="@{/js/chartjs-plugin-zoom.min.js}" type="module"></script>
+<script th:src="@{/js/chartjs.umd.js}"></script>
+<script th:src="@{/js/chartjs-plugin-zoom.min.js}"></script>
 <script th:src="@{/js/SetupHomeScreen.js}" type="module"></script>
-<script th:src="@{/js/SDATFileDayChart.js}" type="module"></script>
+<script th:src="@{/js/SDATFileDayChart.js}"></script>
 <body>
 <div style="width: 100%;">
     <label>
@@ -25,5 +25,7 @@
     /*<![CDATA[*/
     let sdatFiles = /*[[${sdatFiles}]]*/ "[]";
     /*]]>*/
+
+    SDATFileDayChart(sdatFiles);
 </script>
 

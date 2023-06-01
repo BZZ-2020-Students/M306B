@@ -16,8 +16,6 @@ public class SDATCache {
     @Getter(AccessLevel.NONE)
     private static SDATCache instance;
 
-    private static boolean ready;
-
     private final ConcurrentHashMap<FileDate, SDATFile[]> sdatFileHashMap = new ConcurrentHashMap<>();
 
     private SDATCache() {
@@ -36,8 +34,6 @@ public class SDATCache {
 
             sdatCache.addSDATFile(fileDate, sdatFile);
         });
-
-        ready = true;
     }
 
     public static void fillCacheSequential(String filesPath) {
@@ -53,8 +49,6 @@ public class SDATCache {
 
             sdatCache.addSDATFile(fileDate, sdatFile);
         }
-
-        ready = true;
     }
 
     public static SDATCache getInstance() {
@@ -63,10 +57,6 @@ public class SDATCache {
         }
 
         return instance;
-    }
-
-    public static boolean isReady() {
-        return ready;
     }
 
     public void addSDATFile(FileDate fileDate, SDATFile sdatFile) {

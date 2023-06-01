@@ -8,8 +8,6 @@
 <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
 <script th:src="@{/js/chartjs.umd.js}"></script>
 <script th:src="@{/js/chartjs-plugin-zoom.min.js}"></script>
-<script th:src="@{/js/SetupHomeScreen.js}" type="module"></script>
-<script th:src="@{/js/SDATFileDayChart.js}"></script>
 <body>
 <div style="width: 100%;">
     <label>
@@ -21,11 +19,23 @@
 </div>
 </body>
 </html>
-<script th:inline="javascript">
+<script th:inline="javascript" th:type="module">
+    // add on change event listener to dropdown
+    document.getElementById("chart-selection-dropdown").addEventListener("change", function () {
+        let url = new URL(window.location.href);
+        url.searchParams.set("type", this.value);
+        
+        window.location.href = url.href;
+    });
+
+    import {setupHomeScreen} from "./js/SetupHomeScreen.js";
     /*<![CDATA[*/
-    let sdatFiles = /*[[${sdatFiles}]]*/ "[]";
+    let sdatFiles = /*[[${sdatFiles}]]*/ undefined;
+    let meterFiles = /*[[${meterFiles}]]*/ undefined;
+    let chartType = /*[[${chartType}]]*/ "[]";
     /*]]>*/
 
-    SDATFileDayChart(sdatFiles);
+    let data = (sdatFiles !== undefined) ? sdatFiles : meterFiles;
+    setupHomeScreen(chartType, data);
 </script>
 

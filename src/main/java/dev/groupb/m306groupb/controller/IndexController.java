@@ -2,6 +2,7 @@ package dev.groupb.m306groupb.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.groupb.m306groupb.enums.DiagramTypes;
 import dev.groupb.m306groupb.model.FileDate;
 import dev.groupb.m306groupb.model.SDATFile.SDATCache;
 import dev.groupb.m306groupb.model.SDATFile.SDATFile;
@@ -22,39 +23,47 @@ import java.util.concurrent.ConcurrentHashMap;
 public class IndexController {
     @GetMapping("/")
     public String load_index(@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date from,
-                             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date to, Model model) {
-        SDATCache sdatCache = SDATCache.getInstance();
+                             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date to,
+                             @RequestParam(required = false) String type,
+                             Model model) {
+        DiagramTypes diagramType = DiagramTypes.fromString(type);
+        model.addAttribute("chartType", diagramType.toString());
 
-        if (SDATCache.isReady()) {
-            try {
-                ConcurrentHashMap<FileDate, SDATFile[]> sdatFileHashMap = sdatCache.getSdatFileHashMap();
-                // sort by start date
-                List<SDATFileWithDate> fileDateSdatFilesList = new java.util.ArrayList<>(sdatFileHashMap.entrySet().stream()
-                        .map(entry -> SDATFileWithDate.builder().fileDate(entry.getKey()).SDATFiles(entry.getValue()).build())
-                        .toList());
-                fileDateSdatFilesList.sort(SDATFileWithDate::compareTo);
+        switch (diagramType) {
+            case USAGE -> {
+                SDATCache sdatCache = SDATCache.getInstance();
 
-                // get the earliest date and the latest date if they aren't specified in the request
-                Date earliestDate = (from == null) ? fileDateSdatFilesList.get(0).getFileDate().getStartDate() : from;
-                Date latestDate = (to == null) ? fileDateSdatFilesList.get(fileDateSdatFilesList.size() - 1).getFileDate().getStartDate() : to;
+                try {
+                    ConcurrentHashMap<FileDate, SDATFile[]> sdatFileHashMap = sdatCache.getSdatFileHashMap();
+                    // sort by start date
+                    List<SDATFileWithDate> fileDateSdatFilesList = new java.util.ArrayList<>(sdatFileHashMap.entrySet().stream()
+                            .map(entry -> SDATFileWithDate.builder().fileDate(entry.getKey()).SDATFiles(entry.getValue()).build())
+                            .toList());
+                    fileDateSdatFilesList.sort(SDATFileWithDate::compareTo);
 
-                // filter the list
-                fileDateSdatFilesList = new java.util.ArrayList<>(fileDateSdatFilesList.stream()
-                        .filter(sdatFileWithDate -> !sdatFileWithDate.getFileDate().getStartDate().before(earliestDate) && !sdatFileWithDate.getFileDate().getStartDate().after(latestDate))
-                        .toList());
+                    // get the earliest date and the latest date if they aren't specified in the request
+                    Date earliestDate = (from == null) ? fileDateSdatFilesList.get(0).getFileDate().getStartDate() : from;
+                    Date latestDate = (to == null) ? fileDateSdatFilesList.get(fileDateSdatFilesList.size() - 1).getFileDate().getStartDate() : to;
 
-                SimpleDateFormat simpleDateFormat = new SimpleDateFormat(GlobalStuff.SDAT_DATE_FORMAT);
-                ObjectMapper objectMapper = new ObjectMapper();
-                objectMapper.setDateFormat(simpleDateFormat);
-                String json = objectMapper.writeValueAsString(fileDateSdatFilesList);
+                    // filter the list
+                    fileDateSdatFilesList = new java.util.ArrayList<>(fileDateSdatFilesList.stream()
+                            .filter(sdatFileWithDate -> !sdatFileWithDate.getFileDate().getStartDate().before(earliestDate) && !sdatFileWithDate.getFileDate().getStartDate().after(latestDate))
+                            .toList());
 
-                model.addAttribute("sdatFiles", json);
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat(GlobalStuff.SDAT_DATE_FORMAT);
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    objectMapper.setDateFormat(simpleDateFormat);
+                    String json = objectMapper.writeValueAsString(fileDateSdatFilesList);
+
+                    model.addAttribute("sdatFiles", json);
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
             }
-        } else {
-            System.out.println("SDATCache is not ready yet");
-            model.addAttribute("sdatFiles", "[]");
+            case METER -> {
+//                throw new UnsupportedOperationException("Not implemented yet");
+            }
+            default -> throw new IllegalStateException("Unexpected value: " + diagramType);
         }
 
         return "index";

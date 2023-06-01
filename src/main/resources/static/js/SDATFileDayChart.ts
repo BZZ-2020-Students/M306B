@@ -45,7 +45,7 @@ interface ChartData {
     data: number[]
 }
 
-function SDATFileDayChart(sdatFilesRaw: any) {
+export function SDATFileDayChart(sdatFilesRaw: any) {
     let jsonData: SdatWithFileDate[] = JSON.parse(sdatFilesRaw);
 
     const fileTypes: FileType[] = [];

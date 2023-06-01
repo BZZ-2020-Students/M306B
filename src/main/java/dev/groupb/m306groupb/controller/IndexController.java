@@ -45,6 +45,10 @@ public class IndexController {
                     Date earliestDate = (from == null) ? fileDateSdatFilesList.get(0).getFileDate().getStartDate() : from;
                     Date latestDate = (to == null) ? fileDateSdatFilesList.get(fileDateSdatFilesList.size() - 1).getFileDate().getStartDate() : to;
 
+                    SimpleDateFormat frontendDayFormat = new SimpleDateFormat(GlobalStuff.ONLY_DAY_FORMAT);
+                    model.addAttribute("earliestDate", frontendDayFormat.format(earliestDate));
+                    model.addAttribute("latestDate", frontendDayFormat.format(latestDate));
+
                     // filter the list
                     fileDateSdatFilesList = new java.util.ArrayList<>(fileDateSdatFilesList.stream()
                             .filter(sdatFileWithDate -> !sdatFileWithDate.getFileDate().getStartDate().before(earliestDate) && !sdatFileWithDate.getFileDate().getStartDate().after(latestDate))

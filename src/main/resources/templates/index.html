@@ -15,25 +15,60 @@
         </select>
     </label>
 
+    From: <label for="fromDate"></label><input type="date" id="fromDate"><br>
+    To: <label for="toDate"></label><input type="date" id="toDate"><br>
+
     <canvas id="sdat-file-chart"></canvas>
 </div>
 </body>
 </html>
 <script th:inline="javascript" th:type="module">
-    // add on change event listener to dropdown
-    document.getElementById("chart-selection-dropdown").addEventListener("change", function () {
-        let url = new URL(window.location.href);
-        url.searchParams.set("type", this.value);
-        
-        window.location.href = url.href;
-    });
-
-    import {setupHomeScreen} from "./js/SetupHomeScreen.js";
     /*<![CDATA[*/
     let sdatFiles = /*[[${sdatFiles}]]*/ undefined;
     let meterFiles = /*[[${meterFiles}]]*/ undefined;
-    let chartType = /*[[${chartType}]]*/ "[]";
+    let chartType = /*[[${chartType}]]*/ undefined;
+    let earliestDate = /*[[${earliestDate}]]*/ undefined;
+    let latestDate = /*[[${latestDate}]]*/ undefined;
     /*]]>*/
+
+    document.getElementById("chart-selection-dropdown").addEventListener("change", function () {
+        let url = new URL(window.location.href);
+        url.searchParams.set("type", this.value);
+
+        window.location.href = url.href;
+    });
+
+    const urlParams = new URLSearchParams(window.location.search);
+    let from = urlParams.get('from');
+    let to = urlParams.get('to');
+
+    if (!from) {
+        from = earliestDate; // Set a specific date here
+        urlParams.set('from', from);
+    }
+
+    if (!to) {
+        to = latestDate; // Set a specific date here
+        urlParams.set('to', to);
+    }
+
+    console.log("from", from)
+    console.log("to", to)
+
+    document.getElementById('fromDate').value = from;
+    document.getElementById('toDate').value = to;
+
+    document.getElementById('fromDate').addEventListener('change', (event) => {
+        urlParams.set('from', event.target.value);
+        window.location.search = urlParams.toString();
+    });
+
+    document.getElementById('toDate').addEventListener('change', (event) => {
+        urlParams.set('to', event.target.value);
+        window.location.search = urlParams.toString();
+    });
+
+    import {setupHomeScreen} from "./js/SetupHomeScreen.js";
 
     let data = (sdatFiles !== undefined) ? sdatFiles : meterFiles;
     setupHomeScreen(chartType, data);

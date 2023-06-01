@@ -141,8 +141,11 @@ buildNumber.properties
 *.js
 
 !src/main/resources/static/js/chartjs-plugin-zoom.min.js
+<<<<<<< HEAD
 !src/main/resources/static/js/chartjs.umd.js
 
 node_modules/
 
 package-lock.json
+=======
+>>>>>>> 19-implement-zoom-in-chart

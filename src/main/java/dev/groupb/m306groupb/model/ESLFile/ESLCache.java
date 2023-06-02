@@ -25,23 +25,12 @@ public class ESLCache {
     }
 
     public static void fillCacheParallel(String filesPath) {
-        ESLCache sdatCache = ESLCache.getInstance();
-        sdatCache.getEslFileMap().clear();
+        ESLCache eslCache = ESLCache.getInstance();
+        eslCache.getEslFileMap().clear();
 
-        ESLFileReader eslFileReader = new ESLFileReader();
         File[] files = FileReader.getFiles(filesPath);
 
-        Arrays.stream(files).parallel().forEach(file -> {
-            int amountOfESLFilesToExpect = eslFileReader.amountOfEslFiles(file);
-            for (int i = 0; i < amountOfESLFilesToExpect; i++) {
-                ESLFile eslFile = eslFileReader.parseFile(file, i);
-                if (eslFile == null) {
-                    continue;
-                }
-                FileDate fileDate = eslFileReader.getFileDate(file, i);
-                sdatCache.addESLFile(fileDate, eslFile);
-            }
-        });
+        Arrays.stream(files).parallel().forEach(ESLCache::addFileToCache);
     }
 
     public static ESLCache getInstance() {
@@ -49,6 +38,43 @@ public class ESLCache {
             instance = new ESLCache();
         }
         return instance;
+    }
+
+    private static void addFileToCache(File file) {
+        ESLFileReader eslFileReader = new ESLFileReader();
+        int amountOfESLFilesToExpect = eslFileReader.amountOfEslFiles(file);
+        for (int i = 0; i < amountOfESLFilesToExpect; i++) {
+            ESLFile eslFile = eslFileReader.parseFile(file, i);
+            if (eslFile == null) {
+                continue;
+            }
+            FileDate fileDate = eslFileReader.getFileDate(file, i);
+            ESLCache.getInstance().addESLFile(fileDate, eslFile);
+        }
+    }
+
+    public static void fileChanged(File file) {
+        /*
+        Important note: if the DATE of the file changes, the file is considered a new file. because the key is the date, and thus the file is not found in the hashmap.
+         */
+        fileRemoved(file);
+        addFileToCache(file);
+    }
+
+    public static void addNewFile(File file) {
+        addFileToCache(file);
+    }
+
+    public static void fileRemoved(File file) {
+        ESLCache eslCache = ESLCache.getInstance();
+        ESLFileReader eslFileReader = new ESLFileReader();
+
+        int amountOfESLFilesToExpect = eslFileReader.amountOfEslFiles(file);
+
+        for (int i = 0; i < amountOfESLFilesToExpect; i++) {
+            FileDate fileDate = eslFileReader.getFileDate(file, i);
+            eslCache.getEslFileMap().remove(fileDate);
+        }
     }
 
     public void addESLFile(FileDate fileDate, ESLFile eslFile) {

@@ -59,6 +59,38 @@ public class SDATCache {
         return instance;
     }
 
+    private static void addFileToCache(File file) {
+        SDATFileReader sdatFileReader = new SDATFileReader();
+        SDATFile sdatFile = sdatFileReader.parseFile(file);
+        FileDate fileDate = sdatFileReader.getFileDate(file);
+
+        SDATCache.getInstance().addSDATFile(fileDate, sdatFile);
+    }
+
+    public static void fileChanged(String fileName, File newFile) {
+        fileRemoved(fileName);
+        addFileToCache(newFile);
+    }
+
+    public static void addNewFile(File file) {
+        addFileToCache(file);
+    }
+
+    public static void fileRemoved(String fileName) {
+        SDATCache sdatCache = SDATCache.getInstance();
+
+        // find the file in the cache by looking at the file name
+        FileDate fileDate = sdatCache.getSdatFileHashMap().keySet().stream().filter(fileDate1 -> fileDate1.getFileName().equals(fileName)).findFirst().orElse(null);
+
+        // if the file is not found, return
+        if (fileDate == null) {
+            System.out.println("File not found in cache: " + fileName);
+            return;
+        }
+
+        sdatCache.getSdatFileHashMap().remove(fileDate);
+    }
+
     public void addSDATFile(FileDate fileDate, SDATFile sdatFile) {
         SDATFile[] existing = sdatFileHashMap.get(fileDate);
         if (existing != null) {

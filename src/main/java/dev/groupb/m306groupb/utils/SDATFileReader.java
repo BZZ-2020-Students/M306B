@@ -70,6 +70,7 @@ public class SDATFileReader implements FileReader<SDATFile> {
                 }
             }
 
+            fileDate.setFileName(file.getName());
             return fileDate;
         } catch (ParserConfigurationException | IOException | SAXException | ParseException e) {
             throw new RuntimeException(e);
@@ -79,8 +80,6 @@ public class SDATFileReader implements FileReader<SDATFile> {
     @Override
     public SDATFile parseFile(File file) {
         return SDATFile.builder()
-                .fileName(file.getName())
-                .filePath(file.getAbsolutePath())
                 .economicActivity(findFileType(file))
                 .resolution(findResolution(file))
                 .measureUnit(findMeasureUnit(file))

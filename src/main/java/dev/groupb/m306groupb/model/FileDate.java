@@ -12,6 +12,7 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FileDate implements Comparable<FileDate> {
+    private String fileName;
     private Date fileCreationDate;
     private Date startDate;
     private Date endDate;

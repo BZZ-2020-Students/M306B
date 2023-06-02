@@ -37,7 +37,7 @@ public class IndexController {
                 try {
                     ConcurrentHashMap<FileDate, SDATFile[]> sdatFileHashMap = sdatCache.getSdatFileHashMap();
 // sort by start date
-                    List<SDATFileWithDate> fileDateSdatFilesList = new java.util.ArrayList<>(sdatFileHashMap.entrySet().stream()
+                    List<SDATFileWithDate> fileDateSdatFilesList = new java.util.ArrayList<>(sdatFileHashMap.entrySet().stream().parallel()
                             .map(entry -> SDATFileWithDate.builder().fileDate(entry.getKey()).SDATFiles(entry.getValue()).build())
                             .toList());
                     fileDateSdatFilesList.sort(SDATFileWithDate::compareTo);
@@ -59,7 +59,7 @@ public class IndexController {
 
                     if (sameDay) {
                         // if from and to dates are the same day, return data for that day
-                        fileDateSdatFilesList = new java.util.ArrayList<>(fileDateSdatFilesList.stream()
+                        fileDateSdatFilesList = new java.util.ArrayList<>(fileDateSdatFilesList.stream().parallel()
                                 .filter(sdatFileWithDate -> {
                                     Calendar cal3 = Calendar.getInstance();
                                     cal3.setTime(sdatFileWithDate.getFileDate().getStartDate());
@@ -73,7 +73,7 @@ public class IndexController {
                         cal4.setTime(latestDate);
                         cal4.add(Calendar.DATE, 1); // add one day to make the range inclusive
                         Date inclusiveLatestDate = cal4.getTime();
-                        fileDateSdatFilesList = new java.util.ArrayList<>(fileDateSdatFilesList.stream()
+                        fileDateSdatFilesList = new java.util.ArrayList<>(fileDateSdatFilesList.stream().parallel()
                                 .filter(sdatFileWithDate -> !sdatFileWithDate.getFileDate().getStartDate().before(earliestDate) && !sdatFileWithDate.getFileDate().getStartDate().after(inclusiveLatestDate))
                                 .toList());
                     }

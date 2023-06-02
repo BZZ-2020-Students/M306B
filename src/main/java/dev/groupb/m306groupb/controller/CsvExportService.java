@@ -10,10 +10,14 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,8 +37,8 @@ public class CsvExportService {
      */
     @GetMapping("/range/{from}/{to}")
     public ResponseEntity<?> exportDataInRange(
-            @PathParam("from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date from,
-            @PathParam("to") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date to,
+            @PathVariable("from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date from,
+            @PathVariable("to") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date to,
             HttpServletResponse response
     ) throws IOException {
         // Retrieve the relevant SDATFiles from the SDATCache within the specified time range
@@ -48,30 +52,41 @@ public class CsvExportService {
 
         // Generate CSV content
         StringBuilder csvContent = new StringBuilder();
-        csvContent.append("Header 1,Header 2,Header 3\n");
+        csvContent.append("EconomicActivity,Resolution,MeasureUnit,Observations\n");
         for (SDATFile[] files : filesInRange.values()) {
             for (SDATFile file : files) {
-                csvContent.append(file.getFileName()).append(",");
-                csvContent.append(file.getSDATFileType()).append(",");
-                csvContent.append(file.getResolution()).append("\n");
+                csvContent.append(file.getEconomicActivity()).append(","); // Append EconomicActivity
+                csvContent.append(file.getResolution()).append(","); // Append Resolution
+                csvContent.append(file.getMeasureUnit()).append(","); // Append MeasureUnit
+                csvContent.append(file.getObservations()).append("\n"); // Append Observations
             }
         }
+
+        // Generate the dynamic file name with the specified date range
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+        String fromDate = dateFormat.format(from);
+        String toDate = dateFormat.format(to);
+        String fileName = "data_" + fromDate + "_to_" + toDate + ".csv";
+
+        // Write the CSV content to a file
+        writeCsvToFile(csvContent.toString(), fileName);
 
         // Set the response headers
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-        headers.setContentDispositionFormData("attachment", "data.csv");
+        headers.setContentDispositionFormData("attachment", fileName);
 
-        // Write the CSV content to the response output stream
-        response.setHeader("Content-Disposition", "attachment; filename=data.csv");
-        response.setContentType("text/csv");
-        response.getWriter().write(csvContent.toString());
-        response.getWriter().flush();
-
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok().headers(headers).build();
     }
 
-    public boolean isWithinTimeRange(FileDate fileDate, Date start, Date end) {
+    private boolean isWithinTimeRange(FileDate fileDate, Date start, Date end) {
         return !fileDate.getStartDate().after(end) && !fileDate.getStartDate().before(start);
+    }
+
+    private void writeCsvToFile(String csvContent, String fileName) throws IOException {
+        String filePath = "D:/Dev/bzz/M306/files/CSV-Files-By-CsvExporter/" + fileName;
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+            writer.write(csvContent);
+        }
     }
 }

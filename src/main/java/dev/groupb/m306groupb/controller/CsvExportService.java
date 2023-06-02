@@ -5,21 +5,16 @@ import dev.groupb.m306groupb.model.SDATFile.SDATCache;
 import dev.groupb.m306groupb.model.SDATFile.SDATFile;
 import dev.groupb.m306groupb.utils.GlobalStuff;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.supercsv.io.CsvBeanWriter;
 import org.supercsv.io.CsvMapWriter;
-import org.supercsv.io.ICsvBeanWriter;
 import org.supercsv.io.ICsvMapWriter;
 import org.supercsv.prefs.CsvPreference;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -32,9 +27,6 @@ import java.util.stream.Collectors;
 @RequestMapping("/export")
 public class CsvExportService {
     private final SDATCache cacheData = SDATCache.getInstance();
-
-    @Value("${exported.files.path}")
-    private String exported_files_path;
 
     /**
      * Exports data as a CSV file within a specific time range.
@@ -60,7 +52,7 @@ public class CsvExportService {
         boolean sameDay = cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
                 cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
 
-        Map<FileDate, SDATFile[]> filteredMap = new HashMap<>();
+        Map<FileDate, SDATFile[]> filteredMap;
         if (sameDay) {
             filteredMap = cacheData.getSdatFileHashMap().entrySet().stream().parallel()
                     .filter(entry -> {
@@ -95,30 +87,28 @@ public class CsvExportService {
         response.setHeader(headerKey, headerValue);
 
         // Generate CSV content
-        ICsvBeanWriter csvWriter = new CsvBeanWriter(response.getWriter(), CsvPreference.EXCEL_PREFERENCE);
-        String[] csvHeader = {"Start", "End", "EconomicActivity", "Resolution", "MeasureUnit", "Observations"};
-        String[] SDATFileNameMapping = {null,null,"economicActivity", "resolution", "measureUnit", "observations"};
-        String[] fileDateNameMapping = {"startDate", "endDate", null, null, null, null};
+        String[] csvHeader = {"Start", "End", "EconomicActivity", "ResolutionType", "ResolutionAmount", "MeasureUnit", "Observations"};
+        String[] nameMapping = {"startDate", "endDate", "economicActivity", "resolutionType", "resolutionAmount", "measureUnit", "observations"};
 
+        ICsvMapWriter csvWriter = new CsvMapWriter(response.getWriter(), CsvPreference.EXCEL_PREFERENCE);
         csvWriter.writeHeader(csvHeader);
 
-        for (FileDate dates : filteredMap.keySet()) {
-            for (SDATFile file : filteredMap.get(dates)) {
-                csvWriter.write(dates, fileDateNameMapping);
-                csvWriter.write(file, SDATFileNameMapping);
+        for (Map.Entry<FileDate, SDATFile[]> entry : filteredMap.entrySet()) {
+            FileDate fileDate = entry.getKey();
+            SDATFile[] sdatFiles = entry.getValue();
+            for (SDATFile sdatFile : sdatFiles) {
+                Map<String, Object> csvContent = new HashMap<>();
+                csvContent.put("startDate", fileDate.getStartDate());
+                csvContent.put("endDate", fileDate.getEndDate());
+                csvContent.put("economicActivity", sdatFile.getEconomicActivity());
+                csvContent.put("resolutionType", sdatFile.getResolution().getTimeUnit());
+                csvContent.put("resolutionAmount", sdatFile.getResolution().getResolution());
+                csvContent.put("measureUnit", sdatFile.getMeasureUnit());
+                csvContent.put("observations", sdatFile.getObservations());
+                csvWriter.write(csvContent, nameMapping);
             }
         }
+
         csvWriter.close();
-    }
-
-    private boolean isWithinTimeRange(FileDate fileDate, Date start, Date end) {
-        return !fileDate.getStartDate().after(end) && !fileDate.getStartDate().before(start);
-    }
-
-    private void writeCsvToFile(String csvContent, String fileName) throws IOException {
-        String filePath = exported_files_path + fileName;
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
-            writer.write(csvContent);
-        }
     }
 }

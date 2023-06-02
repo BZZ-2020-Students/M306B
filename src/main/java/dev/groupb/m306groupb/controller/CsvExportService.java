@@ -17,6 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -68,7 +71,7 @@ public class CsvExportService {
         String toDate = dateFormat.format(to);
         String fileName = "data_" + fromDate + "_to_" + toDate + ".csv";
 
-        // Write the CSV content to a file
+        // Save the CSV content to a dynamically generated file in the "Csv-File" directory
         writeCsvToFile(csvContent.toString(), fileName);
 
         // Set the response headers
@@ -84,7 +87,33 @@ public class CsvExportService {
     }
 
     private void writeCsvToFile(String csvContent, String fileName) throws IOException {
-        String filePath = "D:/Dev/bzz/M306/files/CSV-Files-By-CsvExporter/" + fileName;
+        // Get the current project folder
+        Path currentPath = Paths.get("").toAbsolutePath();
+        String projectFolder = currentPath.toString();
+
+        // Create the "file" directory if it doesn't exist
+        String fileDirectory = Paths.get(projectFolder, "files").toString();
+        Path fileDirectoryPath = Paths.get(fileDirectory);
+        if (!Files.exists(fileDirectoryPath)) {
+            Files.createDirectories(fileDirectoryPath);
+        }
+
+        // Create the "Csv-File" subdirectory under the "file" directory if it doesn't exist
+        String csvFileDirectory = Paths.get(fileDirectory, "Csv-File").toString();
+        Path csvFileDirectoryPath = Paths.get(csvFileDirectory);
+        if (!Files.exists(csvFileDirectoryPath)) {
+            Files.createDirectories(csvFileDirectoryPath);
+        }
+
+        // Construct the file path in the "Csv-File" directory of the current project folder
+        String filePath = Paths.get(csvFileDirectory, fileName).toString();
+
+        // Check if the file already exists
+        Path file = Paths.get(filePath);
+        if (Files.exists(file)) {
+            throw new IOException("File already exists");
+        }
+
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
             writer.write(csvContent);
         }

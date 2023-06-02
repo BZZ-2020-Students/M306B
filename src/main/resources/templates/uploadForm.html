@@ -1,4 +1,4 @@
-<html xmlns:th="https://www.thymeleaf.org">
+<html xmlns:th="https://www.thymeleaf.org" lang="en">
 <body>
 
 <div th:if="${message}">
@@ -6,10 +6,19 @@
 </div>
 
 <div>
-    <!--  TODO: make prettier  -->
-    <!--  TODO: action depending on filetype instead of hardcoded. maybe a dropdown to select?  -->
-    <form action="/sdat" enctype="multipart/form-data" method="POST">
+    <a href="/">Back</a>
+
+    <form id="myForm" enctype="multipart/form-data" method="POST">
         <table>
+            <tr>
+                <td>Choose:</td>
+                <td>
+                    <label for="mySelect"></label><select id="mySelect" onchange="changeAction()">
+                    <option value="/files/upload/sdat">SDAT</option>
+                    <option value="/files/upload/esl">ESL</option>
+                </select>
+                </td>
+            </tr>
             <tr>
                 <td>File to upload:</td>
                 <td><input name="file" type="file"/></td>
@@ -21,22 +30,14 @@
         </table>
     </form>
 </div>
-<!-- Display all already uploaded files (very ugly, todo: improve, if even needed?) -->
-<div>
-    <h2>Uploaded SDAT Files</h2>
-    <ul>
-        <li th:each="SDATFile : ${SDATFiles}">
-            <a th:href="${SDATFile}" th:text="${SDATFile}"/>
-        </li>
-    </ul>
-
-    <h2>Uploaded ESL Files</h2>
-    <ul>
-        <li th:each="ESLFile : ${ESLFiles}">
-            <a th:href="${ESLFile}" th:text="${ESLFile}"/>
-        </li>
-    </ul>
-</div>
-
 </body>
 </html>
+<script>
+    function changeAction() {
+        let form = document.getElementById("myForm");
+        let select = document.getElementById("mySelect");
+        form.action = select.value;
+    }
+
+    changeAction();
+</script>

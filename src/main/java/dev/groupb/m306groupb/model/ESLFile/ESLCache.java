@@ -65,7 +65,7 @@ public class ESLCache {
     public static void fileRemoved(String fileName) {
         ESLCache eslCache = ESLCache.getInstance();
 
-        FileDate[] fileDate = eslCache.getEslFileMap().keySet().stream().filter(key -> key.getFileName().equals(fileName)).toArray(FileDate[]::new);
+        FileDate[] fileDate = eslCache.getEslFileMap().keySet().stream().filter(key -> Arrays.asList(key.getFileName()).contains(fileName)).toArray(FileDate[]::new);
 
         if (fileDate.length == 0) {
             System.out.println("ESLFile not found in cache, can't remove: " + fileName);

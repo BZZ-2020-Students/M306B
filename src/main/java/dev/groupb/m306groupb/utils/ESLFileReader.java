@@ -46,7 +46,7 @@ public class ESLFileReader implements FileReader<ESLFile> {
             String end = timePeriod.getAttributes().getNamedItem("end").getNodeValue();
             fileDate.setEndDate(dateFormat.parse(end));
 
-            fileDate.setFileName(file.getName());
+            fileDate.setFileName(new String[]{file.getName()});
 
             return fileDate;
         } catch (ParserConfigurationException | IOException | SAXException | ParseException e) {

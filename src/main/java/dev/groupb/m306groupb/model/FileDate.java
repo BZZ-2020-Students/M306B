@@ -12,7 +12,7 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FileDate implements Comparable<FileDate> {
-    private String fileName;
+    private String[] fileName; // Because for example SDAT files are twice per date, but have different names.
     private Date fileCreationDate;
     private Date startDate;
     private Date endDate;

@@ -80,7 +80,7 @@ public class SDATCache {
         SDATCache sdatCache = SDATCache.getInstance();
 
         // find the file in the cache by looking at the file name
-        FileDate fileDate = sdatCache.getSdatFileHashMap().keySet().stream().filter(fileDate1 -> fileDate1.getFileName().equals(fileName)).findFirst().orElse(null);
+        FileDate fileDate = sdatCache.getSdatFileHashMap().keySet().stream().filter(key -> Arrays.asList(key.getFileName()).contains(fileName)).findFirst().orElse(null);
 
         // if the file is not found, return
         if (fileDate == null) {
@@ -93,11 +93,23 @@ public class SDATCache {
 
     public void addSDATFile(FileDate fileDate, SDATFile sdatFile) {
         SDATFile[] existing = sdatFileHashMap.get(fileDate);
+        FileDate existingFileDate = sdatFileHashMap.keySet().stream().filter(key -> key.equals(fileDate)).findFirst().orElse(null);
         if (existing != null) {
             SDATFile[] newExisting = new SDATFile[existing.length + 1];
             System.arraycopy(existing, 0, newExisting, 0, existing.length);
             newExisting[existing.length] = sdatFile;
-            sdatFileHashMap.put(fileDate, newExisting);
+
+            if (existingFileDate == null) {
+                sdatFileHashMap.put(fileDate, newExisting);
+                return;
+            }
+            // add to the existingFileDate the fileName from the fileDate
+            String[] newFileName = new String[existingFileDate.getFileName().length + 1];
+            System.arraycopy(existingFileDate.getFileName(), 0, newFileName, 0, existingFileDate.getFileName().length);
+            newFileName[existingFileDate.getFileName().length] = fileDate.getFileName()[0];
+            existingFileDate.setFileName(newFileName);
+
+            sdatFileHashMap.put(existingFileDate, newExisting);
         } else {
             sdatFileHashMap.put(fileDate, new SDATFile[]{sdatFile});
         }

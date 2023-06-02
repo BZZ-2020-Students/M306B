@@ -19,6 +19,7 @@
     To: <label for="toDate"></label><input id="toDate" type="date"><br>
 
     <a href="/files/uploadForm">Upload</a>
+    <a id="export-file-csv-link" href="#">Export CSV</a>
 
     <canvas id="sdat-file-chart"></canvas>
 </div>
@@ -53,6 +54,8 @@
         to = latestDate; // Set a specific date here
         urlParams.set('to', to);
     }
+
+    document.getElementById('export-file-csv-link').href = '/export/range/' + from + '/' + to;
 
     document.getElementById('fromDate').value = from;
     document.getElementById('toDate').value = to;

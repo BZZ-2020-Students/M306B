@@ -3,16 +3,20 @@ package dev.groupb.m306groupb.controller;
 import dev.groupb.m306groupb.model.FileDate;
 import dev.groupb.m306groupb.model.SDATFile.SDATCache;
 import dev.groupb.m306groupb.model.SDATFile.SDATFile;
+import dev.groupb.m306groupb.utils.GlobalStuff;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.supercsv.io.CsvBeanWriter;
+import org.supercsv.io.CsvMapWriter;
+import org.supercsv.io.ICsvBeanWriter;
+import org.supercsv.io.ICsvMapWriter;
+import org.supercsv.prefs.CsvPreference;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -38,13 +42,12 @@ public class CsvExportService {
      * @param from     Start date of the time range (in yyyy-MM-dd format)
      * @param to       End date of the time range (in yyyy-MM-dd format)
      * @param response HttpServletResponse to set the CSV file as the response
-     * @return ResponseEntity with the CSV file as the response body
      */
     @GetMapping(
             value = "/range/{from}/{to}",
             produces = MediaType.APPLICATION_OCTET_STREAM_VALUE
     )
-    public ResponseEntity<?> exportDataInRange(
+    public void exportDataInRange(
             @PathVariable("from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date from,
             @PathVariable("to") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date to,
             HttpServletResponse response
@@ -79,33 +82,33 @@ public class CsvExportService {
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         }
 
-        System.out.println("FilteredMap: " + filteredMap);
+        response.setContentType("text/csv");
+        SimpleDateFormat dateFormat = new SimpleDateFormat(GlobalStuff.FILENAME_DATE_FORMAT);
+        String currentDateTime = dateFormat.format(new Date());
 
-        // Generate CSV content
-        StringBuilder csvContent = new StringBuilder();
-        csvContent.append("Start,End,EconomicActivity,Resolution,MeasureUnit,Observations\n");
-        for (FileDate dates : filteredMap.keySet()) {
-            for (SDATFile file : filteredMap.get(dates)) {
-                csvContent.append(dates.getStartDate()).append(","); // Append Start
-                csvContent.append(dates.getEndDate()).append(","); // Append EndEconomicActivity
-                csvContent.append(file.getEconomicActivity()).append(","); // Append EconomicActivity
-                csvContent.append(file.getResolution()).append(","); // Append Resolution
-                csvContent.append(file.getMeasureUnit()).append(","); // Append MeasureUnit
-                csvContent.append(file.getObservations()).append("\n"); // Append Observations
-            }
-        }
+        String headerKey = "Content-Disposition";
 
-        // Generate the dynamic file name with the specified date range
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
         String fromDate = dateFormat.format(from);
         String toDate = dateFormat.format(to);
-        String fileName = "data_" + fromDate + "_to_" + toDate + ".csv";
+        String fileName = "data_" + currentDateTime + "_from_" + fromDate + "_to_" + toDate + ".csv";
+        String headerValue = "attachment; filename=" + fileName;
+        response.setHeader(headerKey, headerValue);
 
-        // Set the response headers
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentDispositionFormData("attachment", fileName);
+        // Generate CSV content
+        ICsvBeanWriter csvWriter = new CsvBeanWriter(response.getWriter(), CsvPreference.EXCEL_PREFERENCE);
+        String[] csvHeader = {"Start", "End", "EconomicActivity", "Resolution", "MeasureUnit", "Observations"};
+        String[] SDATFileNameMapping = {null,null,"economicActivity", "resolution", "measureUnit", "observations"};
+        String[] fileDateNameMapping = {"startDate", "endDate", null, null, null, null};
 
-        return ResponseEntity.ok().headers(headers).build();
+        csvWriter.writeHeader(csvHeader);
+
+        for (FileDate dates : filteredMap.keySet()) {
+            for (SDATFile file : filteredMap.get(dates)) {
+                csvWriter.write(dates, fileDateNameMapping);
+                csvWriter.write(file, SDATFileNameMapping);
+            }
+        }
+        csvWriter.close();
     }
 
     private boolean isWithinTimeRange(FileDate fileDate, Date start, Date end) {

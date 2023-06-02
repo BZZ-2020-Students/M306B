@@ -53,11 +53,8 @@ public class ESLCache {
         }
     }
 
-    public static void fileChanged(File file) {
-        /*
-        Important note: if the DATE of the file changes, the file is considered a new file. because the key is the date, and thus the file is not found in the hashmap.
-         */
-        fileRemoved(file);
+    public static void fileChanged(String fileName, File file) {
+        fileRemoved(fileName);
         addFileToCache(file);
     }
 
@@ -65,15 +62,18 @@ public class ESLCache {
         addFileToCache(file);
     }
 
-    public static void fileRemoved(File file) {
+    public static void fileRemoved(String fileName) {
         ESLCache eslCache = ESLCache.getInstance();
-        ESLFileReader eslFileReader = new ESLFileReader();
 
-        int amountOfESLFilesToExpect = eslFileReader.amountOfEslFiles(file);
+        FileDate[] fileDate = eslCache.getEslFileMap().keySet().stream().filter(key -> key.getFileName().equals(fileName)).toArray(FileDate[]::new);
 
-        for (int i = 0; i < amountOfESLFilesToExpect; i++) {
-            FileDate fileDate = eslFileReader.getFileDate(file, i);
-            eslCache.getEslFileMap().remove(fileDate);
+        if (fileDate.length == 0) {
+            System.out.println("ESLFile not found in cache, can't remove: " + fileName);
+            return;
+        }
+
+        for (FileDate date : fileDate) {
+            eslCache.getEslFileMap().remove(date);
         }
     }
 

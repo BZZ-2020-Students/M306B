@@ -26,7 +26,7 @@ public class SDATFileChangeListener implements FileChangeListener {
                     }
                     case MODIFY -> {
                         System.out.println("SDAT File modified: " + cfile.getFile().getName());
-                        SDATCache.fileChanged(cfile.getFile().getName(),cfile.getFile());
+                        SDATCache.fileChanged(cfile.getFile().getName(), cfile.getFile());
                     }
                 }
             }

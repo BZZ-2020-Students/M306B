@@ -21,11 +21,11 @@ public class ESLFileChangeListener implements FileChangeListener {
                     }
                     case DELETE -> {
                         System.out.println("ESL File deleted: " + cfile.getFile().getName());
-                        ESLCache.fileRemoved(cfile.getFile());
+                        ESLCache.fileRemoved(cfile.getFile().getName());
                     }
                     case MODIFY -> {
                         System.out.println("ESL File modified: " + cfile.getFile().getName());
-                        ESLCache.fileChanged(cfile.getFile());
+                        ESLCache.fileChanged(cfile.getFile().getName(), cfile.getFile());
                     }
                 }
             }

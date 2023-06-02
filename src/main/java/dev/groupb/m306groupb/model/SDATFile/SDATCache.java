@@ -84,7 +84,7 @@ public class SDATCache {
 
         // if the file is not found, return
         if (fileDate == null) {
-            System.out.println("File not found in cache: " + fileName);
+            System.out.println("SDATFile not found in cache, can't remove: " + fileName);
             return;
         }
 

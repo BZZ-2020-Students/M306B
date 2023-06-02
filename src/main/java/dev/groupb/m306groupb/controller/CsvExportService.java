@@ -4,7 +4,6 @@ import dev.groupb.m306groupb.model.FileDate;
 import dev.groupb.m306groupb.model.SDATFile.SDATCache;
 import dev.groupb.m306groupb.model.SDATFile.SDATFile;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.websocket.server.PathParam;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
@@ -19,9 +18,11 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/export")
@@ -49,19 +50,44 @@ public class CsvExportService {
             HttpServletResponse response
     ) throws IOException {
         // Retrieve the relevant SDATFiles from the SDATCache within the specified time range
-        Map<FileDate, SDATFile[]> filesInRange = new HashMap<>();
-        for (Map.Entry<FileDate, SDATFile[]> entry : cacheData.getSdatFileHashMap().entrySet()) {
-            FileDate fileDate = entry.getKey();
-            if (isWithinTimeRange(fileDate, from, to)) {
-                filesInRange.put(fileDate, entry.getValue());
-            }
+        Calendar cal1 = Calendar.getInstance();
+        Calendar cal2 = Calendar.getInstance();
+        cal1.setTime(from);
+        cal2.setTime(to);
+        boolean sameDay = cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
+                cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
+
+        Map<FileDate, SDATFile[]> filteredMap = new HashMap<>();
+        if (sameDay) {
+            filteredMap = cacheData.getSdatFileHashMap().entrySet().stream().parallel()
+                    .filter(entry -> {
+                        Calendar cal3 = Calendar.getInstance();
+                        cal3.setTime(entry.getKey().getStartDate());
+                        return cal1.get(Calendar.YEAR) == cal3.get(Calendar.YEAR) &&
+                                cal1.get(Calendar.DAY_OF_YEAR) == cal3.get(Calendar.DAY_OF_YEAR);
+                    })
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        } else {
+            Calendar cal4 = Calendar.getInstance();
+            cal4.setTime(to);
+            cal4.add(Calendar.DATE, 1); // add one day to make the range inclusive
+            Date inclusiveLatestDate = cal4.getTime();
+            filteredMap = cacheData.getSdatFileHashMap().entrySet().stream().parallel()
+                    .filter(entry ->
+                            !entry.getKey().getStartDate().before(from) && !entry.getKey().getStartDate().after(inclusiveLatestDate)
+                    )
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         }
+
+        System.out.println("FilteredMap: " + filteredMap);
 
         // Generate CSV content
         StringBuilder csvContent = new StringBuilder();
-        csvContent.append("EconomicActivity,Resolution,MeasureUnit,Observations\n");
-        for (SDATFile[] files : filesInRange.values()) {
-            for (SDATFile file : files) {
+        csvContent.append("Start,End,EconomicActivity,Resolution,MeasureUnit,Observations\n");
+        for (FileDate dates : filteredMap.keySet()) {
+            for (SDATFile file : filteredMap.get(dates)) {
+                csvContent.append(dates.getStartDate()).append(","); // Append Start
+                csvContent.append(dates.getEndDate()).append(","); // Append EndEconomicActivity
                 csvContent.append(file.getEconomicActivity()).append(","); // Append EconomicActivity
                 csvContent.append(file.getResolution()).append(","); // Append Resolution
                 csvContent.append(file.getMeasureUnit()).append(","); // Append MeasureUnit
@@ -75,12 +101,8 @@ public class CsvExportService {
         String toDate = dateFormat.format(to);
         String fileName = "data_" + fromDate + "_to_" + toDate + ".csv";
 
-        // Write the CSV content to a file
-        writeCsvToFile(csvContent.toString(), fileName);
-
         // Set the response headers
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
         headers.setContentDispositionFormData("attachment", fileName);
 
         return ResponseEntity.ok().headers(headers).build();

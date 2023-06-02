@@ -139,3 +139,10 @@ buildNumber.properties
 .idea/codeStyles/
 
 *.js
+
+!src/main/resources/static/js/chartjs-plugin-zoom.min.js
+!src/main/resources/static/js/chartjs.umd.js
+
+node_modules/
+
+package-lock.json

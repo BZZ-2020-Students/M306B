@@ -12,6 +12,7 @@ enum TimeUnit {
 }
 
 interface FileDate {
+    fileName: string,
     fileCreationDate: string;
     startDate: string;
     endDate: string;
@@ -28,8 +29,7 @@ interface Observation {
 }
 
 interface SdatFile {
-    fileName: string;
-    sdatfileType: FileType;
+    economicActivity: FileType;
     resolution: Resolution;
     measureUnit: MeasureUnit;
     observations: Observation[];
@@ -45,7 +45,7 @@ interface ChartData {
     data: number[]
 }
 
-function SDATFileDayChart(sdatFilesRaw: any) {
+export function SDATFileDayChart(sdatFilesRaw: any) {
     let jsonData: SdatWithFileDate[] = JSON.parse(sdatFilesRaw);
 
     const fileTypes: FileType[] = [];
@@ -53,8 +53,8 @@ function SDATFileDayChart(sdatFilesRaw: any) {
         const sdatWithFileDate = jsonData[i];
         for (let j = 0; j < sdatWithFileDate.sdatfiles.length; j++) {
             const sdatFile = sdatWithFileDate.sdatfiles[j];
-            if (fileTypes.indexOf(sdatFile.sdatfileType) === -1) {
-                fileTypes.push(sdatFile.sdatfileType);
+            if (fileTypes.indexOf(sdatFile.economicActivity) === -1) {
+                fileTypes.push(sdatFile.economicActivity);
             }
         }
     }
@@ -67,7 +67,7 @@ function SDATFileDayChart(sdatFilesRaw: any) {
             const sdatWithFileDate = jsonData[j];
             for (let k = 0; k < sdatWithFileDate.sdatfiles.length; k++) {
                 const sdatFile = sdatWithFileDate.sdatfiles[k];
-                if (sdatFile.sdatfileType === fileType) {
+                if (sdatFile.economicActivity === fileType) {
                     for (let l = 0; l < sdatFile.observations.length; l++) {
                         const observation = sdatFile.observations[l];
                         data.push(observation.volume);
@@ -130,9 +130,10 @@ function SDATFileDayChart(sdatFilesRaw: any) {
         }
     };
 
+
     // @ts-ignore
     new Chart(
-        document.getElementById('sdat-file-chart'),
+        document.getElementById('sdat-file-chart') as HTMLCanvasElement,
         {
             type: 'line',
             data: data,

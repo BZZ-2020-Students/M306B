@@ -5,6 +5,7 @@ import dev.groupb.m306groupb.model.SDATFile.SDATCache;
 import dev.groupb.m306groupb.model.SDATFile.SDATFile;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.websocket.server.PathParam;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -27,6 +28,9 @@ import java.util.Map;
 public class CsvExportService {
     private final SDATCache cacheData = SDATCache.getInstance();
 
+    @Value("${exported.files.path}")
+    private String exported_files_path;
+
     /**
      * Exports data as a CSV file within a specific time range.
      *
@@ -35,7 +39,10 @@ public class CsvExportService {
      * @param response HttpServletResponse to set the CSV file as the response
      * @return ResponseEntity with the CSV file as the response body
      */
-    @GetMapping("/range/{from}/{to}")
+    @GetMapping(
+            value = "/range/{from}/{to}",
+            produces = MediaType.APPLICATION_OCTET_STREAM_VALUE
+    )
     public ResponseEntity<?> exportDataInRange(
             @PathVariable("from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date from,
             @PathVariable("to") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date to,
@@ -84,7 +91,7 @@ public class CsvExportService {
     }
 
     private void writeCsvToFile(String csvContent, String fileName) throws IOException {
-        String filePath = "D:/Dev/bzz/M306/files/CSV-Files-By-CsvExporter/" + fileName;
+        String filePath = exported_files_path + fileName;
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
             writer.write(csvContent);
         }

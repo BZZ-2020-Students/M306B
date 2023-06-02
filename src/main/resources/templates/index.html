@@ -54,8 +54,8 @@
         to = latestDate; // Set a specific date here
         urlParams.set('to', to);
     }
-
-    document.getElementById('export-file-csv-link').href = '/export/range/' + from + '/' + to;
+    
+    document.getElementById('export-file-csv-link').href = '/export/csv/' + from + '/' + to;
 
     document.getElementById('fromDate').value = from;
     document.getElementById('toDate').value = to;

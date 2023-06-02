@@ -36,10 +36,10 @@ public class CsvExportService {
      * @param response HttpServletResponse to set the CSV file as the response
      */
     @GetMapping(
-            value = "/range/{from}/{to}",
+            value = "/csv/{from}/{to}",
             produces = MediaType.APPLICATION_OCTET_STREAM_VALUE
     )
-    public void exportDataInRange(
+    public void exportDataCSV(
             @PathVariable("from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date from,
             @PathVariable("to") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date to,
             HttpServletResponse response
@@ -110,5 +110,58 @@ public class CsvExportService {
         }
 
         csvWriter.close();
+    }
+
+    @GetMapping(
+            value = "/json/{from}/{to}",
+            produces = MediaType.APPLICATION_OCTET_STREAM_VALUE
+    )
+    public void exportDataJSON(
+            @PathVariable("from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date from,
+            @PathVariable("to") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date to,
+            HttpServletResponse response
+    ) throws IOException {
+        // Retrieve the relevant SDATFiles from the SDATCache within the specified time range
+        Calendar cal1 = Calendar.getInstance();
+        Calendar cal2 = Calendar.getInstance();
+        cal1.setTime(from);
+        cal2.setTime(to);
+        boolean sameDay = cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
+                cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
+
+        Map<FileDate, SDATFile[]> filteredMap;
+        if (sameDay) {
+            filteredMap = cacheData.getSdatFileHashMap().entrySet().stream().parallel()
+                    .filter(entry -> {
+                        Calendar cal3 = Calendar.getInstance();
+                        cal3.setTime(entry.getKey().getStartDate());
+                        return cal1.get(Calendar.YEAR) == cal3.get(Calendar.YEAR) &&
+                                cal1.get(Calendar.DAY_OF_YEAR) == cal3.get(Calendar.DAY_OF_YEAR);
+                    })
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        } else {
+            Calendar cal4 = Calendar.getInstance();
+            cal4.setTime(to);
+            cal4.add(Calendar.DATE, 1); // add one day to make the range inclusive
+            Date inclusiveLatestDate = cal4.getTime();
+            filteredMap = cacheData.getSdatFileHashMap().entrySet().stream().parallel()
+                    .filter(entry ->
+                            !entry.getKey().getStartDate().before(from) && !entry.getKey().getStartDate().after(inclusiveLatestDate)
+                    )
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        }
+
+        // json
+        response.setContentType("application/json");
+        SimpleDateFormat dateFormat = new SimpleDateFormat(GlobalStuff.FILENAME_DATE_FORMAT);
+        String currentDateTime = dateFormat.format(new Date());
+
+        String headerKey = "Content-Disposition";
+
+        String fromDate = dateFormat.format(from);
+        String toDate = dateFormat.format(to);
+        String fileName = "data_" + currentDateTime + "_from_" + fromDate + "_to_" + toDate + ".json";
+
+        // todo
     }
 }

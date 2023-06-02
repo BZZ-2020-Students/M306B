@@ -12,6 +12,7 @@ enum TimeUnit {
 }
 
 interface FileDate {
+    fileName: string,
     fileCreationDate: string;
     startDate: string;
     endDate: string;
@@ -28,7 +29,6 @@ interface Observation {
 }
 
 interface SdatFile {
-    fileName: string;
     economicActivity: FileType;
     resolution: Resolution;
     measureUnit: MeasureUnit;

@@ -125,12 +125,10 @@ public class FileExportController {
     }
 
     private void exportDataJSON(HttpServletResponse response, Map<FileDate, SDATFile[]> filteredMap, Date from, Date to) throws IOException {
-        System.out.println("filteredMap = " + filteredMap);
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(GlobalStuff.SDAT_DATE_FORMAT);
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.setDateFormat(simpleDateFormat);
         String json = objectMapper.writeValueAsString(filteredMap);
-        System.out.println("json = " + json);
 
         response.setContentType("application/json");
         SimpleDateFormat dateFormat = new SimpleDateFormat(GlobalStuff.FILENAME_DATE_FORMAT);

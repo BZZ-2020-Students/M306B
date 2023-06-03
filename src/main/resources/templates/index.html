@@ -19,7 +19,14 @@
     To: <label for="toDate"></label><input id="toDate" type="date"><br>
 
     <a href="/files/uploadForm">Upload</a>
-    <a id="export-file-csv-link" href="#">Export CSV</a>
+
+    <label>
+        <select id="export-data-type-selection">
+            <option value="csv">CSV</option>
+            <option value="json">JSON</option>
+        </select>
+    </label>
+    <a id="export-data-link" href="#">Export selected Data</a>
 
     <canvas id="sdat-file-chart"></canvas>
 </div>
@@ -54,8 +61,14 @@
         to = latestDate; // Set a specific date here
         urlParams.set('to', to);
     }
-    
-    document.getElementById('export-file-csv-link').href = '/export/csv/' + from + '/' + to;
+
+    const exportDataLink = document.getElementById('export-data-link');
+    const exportDataTypeSelection = document.getElementById('export-data-type-selection');
+    exportDataLink.href = `/export/${exportDataTypeSelection.value}/${from}/${to}`;
+
+    exportDataTypeSelection.addEventListener('change', (event) => {
+        exportDataLink.href = `/export/${event.target.value}/${from}/${to}`;
+    });
 
     document.getElementById('fromDate').value = from;
     document.getElementById('toDate').value = to;

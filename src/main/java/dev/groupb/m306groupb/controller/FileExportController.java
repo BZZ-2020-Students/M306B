@@ -19,10 +19,7 @@ import org.supercsv.prefs.CsvPreference;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -79,9 +76,12 @@ public class FileExportController {
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         }
 
+        // Sort the map by using the CompareTo method of the FileDate class
+        Map<FileDate, SDATFile[]> sortedMap = new TreeMap<>(filteredMap);
+
         switch (ExportTypes.fromString(typePath)) {
-            case CSV -> exportDataCSV(response, filteredMap, from, to);
-            case JSON -> exportDataJSON(response, filteredMap, from, to);
+            case CSV -> exportDataCSV(response, sortedMap, from, to);
+            case JSON -> exportDataJSON(response, sortedMap, from, to);
         }
     }
 
@@ -125,10 +125,12 @@ public class FileExportController {
     }
 
     private void exportDataJSON(HttpServletResponse response, Map<FileDate, SDATFile[]> filteredMap, Date from, Date to) throws IOException {
+        System.out.println("filteredMap = " + filteredMap);
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(GlobalStuff.SDAT_DATE_FORMAT);
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.setDateFormat(simpleDateFormat);
         String json = objectMapper.writeValueAsString(filteredMap);
+        System.out.println("json = " + json);
 
         response.setContentType("application/json");
         SimpleDateFormat dateFormat = new SimpleDateFormat(GlobalStuff.FILENAME_DATE_FORMAT);

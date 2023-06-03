@@ -36,13 +36,13 @@ public class IndexController {
 
                 try {
                     ConcurrentHashMap<FileDate, SDATFile[]> sdatFileHashMap = sdatCache.getSdatFileHashMap();
-// sort by start date
+                    // sort by start date
                     List<SDATFileWithDate> fileDateSdatFilesList = new java.util.ArrayList<>(sdatFileHashMap.entrySet().stream().parallel()
                             .map(entry -> SDATFileWithDate.builder().fileDate(entry.getKey()).SDATFiles(entry.getValue()).build())
                             .toList());
                     fileDateSdatFilesList.sort(SDATFileWithDate::compareTo);
 
-// get the earliest date and the latest date if they aren't specified in the request
+                    // get the earliest date and the latest date if they aren't specified in the request
                     Date earliestDate = (from == null) ? fileDateSdatFilesList.get(0).getFileDate().getStartDate() : from;
                     Date latestDate = (to == null) ? fileDateSdatFilesList.get(fileDateSdatFilesList.size() - 1).getFileDate().getStartDate() : to;
 

@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/export")
-public class CsvExportService {
+public class FileExportController {
     private final SDATCache cacheData = SDATCache.getInstance();
 
     /**

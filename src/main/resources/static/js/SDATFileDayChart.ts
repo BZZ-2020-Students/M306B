@@ -45,7 +45,6 @@ interface ChartData {
     data: number[]
 }
 
-function SDATFileDayChart(sdatFilesRaw: any) {
 let sdatFileChart = null
 
 export function SDATFileDayChart(sdatFilesRaw: any) {

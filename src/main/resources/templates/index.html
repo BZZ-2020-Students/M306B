@@ -6,6 +6,7 @@
     <link rel="stylesheet" th:href="@{/styles/style.css}"/>
 </head>
 <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
+
 <script th:src="@{/js/chartjs.umd.js}"></script>
 <script th:src="@{/js/chartjs-plugin-zoom.min.js}"></script>
 <body>
@@ -28,7 +29,13 @@
     </label>
     <a href="#" id="export-data-link">Export selected Data</a>
 
-    <canvas id="sdat-file-chart"></canvas>
+    <div style="width: 95%; height: 100%; margin: auto">
+        <canvas id="sdat-file-chart"></canvas>
+        <div id="footer">
+            <button id="chartResetButton">Reset zoom</button>
+        </div>
+
+    </div>
 </div>
 </body>
 </html>
@@ -84,6 +91,11 @@
     });
 
     import {setupHomeScreen} from "./js/SetupHomeScreen.js";
+    import {resetZoomChart} from "./js/SDATFileDayChart.js";
+
+    document.getElementById('chartResetButton').addEventListener('click', (event) => {
+        resetZoomChart()
+    })
 
     let data = (sdatFiles !== undefined) ? sdatFiles : meterFiles;
     setupHomeScreen(JSON.parse(chartType), data);

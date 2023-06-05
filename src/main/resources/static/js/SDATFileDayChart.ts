@@ -146,7 +146,7 @@ export function SDATFileDayChart(sdatFilesRaw: any) {
 
 
 }
-function resetZoomChart() {
+export function resetZoomChart() {
     sdatFileChart.resetZoom()
 }
 

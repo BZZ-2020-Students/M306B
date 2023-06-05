@@ -1,7 +1,7 @@
 package dev.groupb.m306groupb.utils;
 
+import dev.groupb.m306groupb.enums.EconomicActivity;
 import dev.groupb.m306groupb.enums.MeasureUnit;
-import dev.groupb.m306groupb.enums.SDATFileType;
 import dev.groupb.m306groupb.enums.Unit;
 import dev.groupb.m306groupb.model.FileDate;
 import dev.groupb.m306groupb.model.Resolution;
@@ -70,6 +70,7 @@ public class SDATFileReader implements FileReader<SDATFile> {
                 }
             }
 
+            fileDate.setFileName(new String[]{file.getName()});
             return fileDate;
         } catch (ParserConfigurationException | IOException | SAXException | ParseException e) {
             throw new RuntimeException(e);
@@ -79,9 +80,7 @@ public class SDATFileReader implements FileReader<SDATFile> {
     @Override
     public SDATFile parseFile(File file) {
         return SDATFile.builder()
-                .fileName(file.getName())
-                .filePath(file.getAbsolutePath())
-                .SDATFileType(findFileType(file))
+                .economicActivity(findFileType(file))
                 .resolution(findResolution(file))
                 .measureUnit(findMeasureUnit(file))
                 .observations(findObservations(file))
@@ -206,7 +205,7 @@ public class SDATFileReader implements FileReader<SDATFile> {
         }
     }
 
-    private SDATFileType findFileType(File file) {
+    private EconomicActivity findFileType(File file) {
         try {
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
@@ -218,9 +217,9 @@ public class SDATFileReader implements FileReader<SDATFile> {
             NodeList production = doc.getElementsByTagName("rsm:ProductionMeteringPoint");
 
             if (consumption.getLength() > 0)
-                return SDATFileType.Consumption;
+                return EconomicActivity.Consumption;
             else if (production.getLength() > 0)
-                return SDATFileType.Production;
+                return EconomicActivity.Production;
 
             throw new RuntimeException("File type not found");
         } catch (ParserConfigurationException | IOException | SAXException e) {

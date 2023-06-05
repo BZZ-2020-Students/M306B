@@ -1,0 +1,91 @@
+<!DOCTYPE HTML>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>SDAT of Day</title>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
+    <link rel="stylesheet" th:href="@{/styles/style.css}"/>
+</head>
+<script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
+<script th:src="@{/js/chartjs.umd.js}"></script>
+<script th:src="@{/js/chartjs-plugin-zoom.min.js}"></script>
+<body>
+<div style="width: 100%;">
+    <label>
+        <select id="chart-selection-dropdown">
+        </select>
+    </label>
+
+    From: <label for="fromDate"></label><input id="fromDate" type="date"><br>
+    To: <label for="toDate"></label><input id="toDate" type="date"><br>
+
+    <a href="/files/uploadForm">Upload</a>
+
+    <label>
+        <select id="export-data-type-selection">
+            <option value="csv">CSV</option>
+            <option value="json">JSON</option>
+        </select>
+    </label>
+    <a href="#" id="export-data-link">Export selected Data</a>
+
+    <canvas id="sdat-file-chart"></canvas>
+</div>
+</body>
+</html>
+<script th:inline="javascript" th:type="module">
+    /*<![CDATA[*/
+    let sdatFiles = /*[[${sdatFiles}]]*/ undefined;
+    let meterFiles = /*[[${meterFiles}]]*/ undefined;
+    let chartType = /*[[${chartType}]]*/ undefined;
+    let earliestDate = /*[[${earliestDate}]]*/ undefined;
+    let latestDate = /*[[${latestDate}]]*/ undefined;
+    /*]]>*/
+
+    document.getElementById("chart-selection-dropdown").addEventListener("change", function () {
+        let url = new URL(window.location.href);
+        url.searchParams.set("type", this.value);
+
+        window.location.href = url.href;
+    });
+
+    const urlParams = new URLSearchParams(window.location.search);
+    let from = urlParams.get('from');
+    let to = urlParams.get('to');
+
+    if (!from) {
+        from = earliestDate; // Set a specific date here
+        urlParams.set('from', from);
+    }
+
+    if (!to) {
+        to = latestDate; // Set a specific date here
+        urlParams.set('to', to);
+    }
+
+    const exportDataLink = document.getElementById('export-data-link');
+    const exportDataTypeSelection = document.getElementById('export-data-type-selection');
+    exportDataLink.href = `/export/${exportDataTypeSelection.value}/${from}/${to}`;
+
+    exportDataTypeSelection.addEventListener('change', (event) => {
+        exportDataLink.href = `/export/${event.target.value}/${from}/${to}`;
+    });
+
+    document.getElementById('fromDate').value = from;
+    document.getElementById('toDate').value = to;
+
+    document.getElementById('fromDate').addEventListener('change', (event) => {
+        urlParams.set('from', event.target.value);
+        window.location.search = urlParams.toString();
+    });
+
+    document.getElementById('toDate').addEventListener('change', (event) => {
+        urlParams.set('to', event.target.value);
+        window.location.search = urlParams.toString();
+    });
+
+    import {setupHomeScreen} from "./js/SetupHomeScreen.js";
+
+    let data = (sdatFiles !== undefined) ? sdatFiles : meterFiles;
+    setupHomeScreen(JSON.parse(chartType), data);
+</script>
+

@@ -46,6 +46,8 @@ public class ESLFileReader implements FileReader<ESLFile> {
             String end = timePeriod.getAttributes().getNamedItem("end").getNodeValue();
             fileDate.setEndDate(dateFormat.parse(end));
 
+            fileDate.setFileName(new String[]{file.getName()});
+
             return fileDate;
         } catch (ParserConfigurationException | IOException | SAXException | ParseException e) {
             throw new RuntimeException(e);
@@ -81,8 +83,6 @@ public class ESLFileReader implements FileReader<ESLFile> {
         }
 
         return ESLFile.builder()
-                .fileName(file.getName())
-                .filePath(file.getAbsolutePath())
                 .highTariffConsumption(obisValues[0])
                 .lowTariffConsumption(obisValues[1])
                 .highTariffProduction(obisValues[2])

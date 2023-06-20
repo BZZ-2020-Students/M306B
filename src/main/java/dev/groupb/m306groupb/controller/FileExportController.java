@@ -2,7 +2,9 @@ package dev.groupb.m306groupb.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.groupb.m306groupb.enums.ExportTypes;
+import dev.groupb.m306groupb.enums.Unit;
 import dev.groupb.m306groupb.model.FileDate;
+import dev.groupb.m306groupb.model.SDATFile.Observation;
 import dev.groupb.m306groupb.model.SDATFile.SDATCache;
 import dev.groupb.m306groupb.model.SDATFile.SDATFile;
 import dev.groupb.m306groupb.utils.GlobalStuff;
@@ -13,8 +15,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.supercsv.io.CsvMapWriter;
-import org.supercsv.io.ICsvMapWriter;
+import org.supercsv.io.CsvListWriter;
+import org.supercsv.io.ICsvListWriter;
 import org.supercsv.prefs.CsvPreference;
 
 import java.io.IOException;
@@ -99,29 +101,56 @@ public class FileExportController {
         response.setHeader(headerKey, headerValue);
 
         // Generate CSV content
-        String[] csvHeader = {"Start", "End", "EconomicActivity", "ResolutionType", "ResolutionAmount", "MeasureUnit", "Observations"};
-        String[] nameMapping = {"startDate", "endDate", "economicActivity", "resolutionType", "resolutionAmount", "measureUnit", "observations"};
+        String[] csvHeader = {"timestamp", "consumption", "production"};
 
-        ICsvMapWriter csvWriter = new CsvMapWriter(response.getWriter(), CsvPreference.EXCEL_PREFERENCE);
-        csvWriter.writeHeader(csvHeader);
+        try (ICsvListWriter listWriter = new CsvListWriter(response.getWriter(), CsvPreference.EXCEL_PREFERENCE)) {
+            listWriter.writeHeader(csvHeader);
 
-        for (Map.Entry<FileDate, SDATFile[]> entry : filteredMap.entrySet()) {
-            FileDate fileDate = entry.getKey();
-            SDATFile[] sdatFiles = entry.getValue();
-            for (SDATFile sdatFile : sdatFiles) {
-                Map<String, Object> csvContent = new HashMap<>();
-                csvContent.put("startDate", fileDate.getStartDate());
-                csvContent.put("endDate", fileDate.getEndDate());
-                csvContent.put("economicActivity", sdatFile.getEconomicActivity());
-                csvContent.put("resolutionType", sdatFile.getResolution().getTimeUnit());
-                csvContent.put("resolutionAmount", sdatFile.getResolution().getResolution());
-                csvContent.put("measureUnit", sdatFile.getMeasureUnit());
-                csvContent.put("observations", sdatFile.observationsToCSV());
-                csvWriter.write(csvContent, nameMapping);
+            for (Map.Entry<FileDate, SDATFile[]> entry : filteredMap.entrySet()) {
+                FileDate fileDate = entry.getKey();
+                SDATFile[] sdatFiles = entry.getValue();
+
+                SDATFile consumptionFile = null;
+                SDATFile productionFile = null;
+
+                for (SDATFile sdatFile : sdatFiles) {
+                    switch (sdatFile.getEconomicActivity()) {
+                        case Production -> productionFile = sdatFile;
+                        case Consumption -> consumptionFile = sdatFile;
+                    }
+                }
+
+                if (consumptionFile == null || productionFile == null) {
+                    System.err.println("Could not find both consumption and production file for date " + fileDate.getStartDate() + "!");
+                    continue;
+                }
+
+                SortedSet<Observation> consumptionObservations = consumptionFile.getObservations();
+                SortedSet<Observation> productionObservations = productionFile.getObservations();
+
+                Iterator<Observation> consumptionIterator = consumptionObservations.iterator();
+                Iterator<Observation> productionIterator = productionObservations.iterator();
+
+                while (consumptionIterator.hasNext() && productionIterator.hasNext()) {
+                    Observation consumptionObservation = consumptionIterator.next();
+                    Observation productionObservation = productionIterator.next();
+
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.setTime(fileDate.getStartDate());
+                    if (Objects.requireNonNull(consumptionFile.getResolution().getTimeUnit()) == Unit.MIN) {
+                        calendar.add(Calendar.MINUTE, consumptionFile.getResolution().getResolution() * (consumptionObservation.getPosition() - 1));
+                    } else {
+                        throw new IllegalStateException("Unexpected value: " + consumptionFile.getResolution().getTimeUnit());
+                    }
+
+                    long timestamp = calendar.getTimeInMillis();
+                    double consumptionVolume = consumptionObservation.getVolume();
+                    double productionVolume = productionObservation.getVolume();
+
+                    listWriter.write(timestamp, consumptionVolume, productionVolume);
+                }
             }
         }
-
-        csvWriter.close();
     }
 
     private void exportDataJSON(HttpServletResponse response, Map<FileDate, SDATFile[]> filteredMap, Date from, Date to) throws IOException {

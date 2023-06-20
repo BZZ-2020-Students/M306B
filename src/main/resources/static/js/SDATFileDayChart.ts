@@ -107,6 +107,45 @@ export function SDATFileDayChart(sdatFilesRaw: any) {
         }
     }
 
+
+    // const maxDataPoints = 100 / datasets[0].data.length;
+    // console.log("maxDataPoints: " + maxDataPoints )
+    // console.log("DATA LENGTH RAAAAA: " + datasets[0].data.length)
+    // const groupSize = datasets[0].data.length * maxDataPoints;
+    // console.log("groupSize:" + groupSize)
+    // const mergedData = Array.from({length: 100}, (_, i) => {
+    //     console.log("i: " + i)
+    //     const groupStart = i * groupSize;
+    //     console.log("groupStart: " + groupStart)
+    //     const groupEnd = groupStart + groupSize;
+    //     console.log("groupEnd: " + groupEnd)
+    //     const groupValues = datasets[0].data.slice(groupStart, groupEnd);
+    //     const groupSum = groupValues.reduce((sum, value) => sum + value, 0);
+    //     return groupSum / groupSize;
+    // });
+
+    const maxDataPoints = 100;
+    const groupSize = Math.ceil(datasets[0].data.length / maxDataPoints);
+    console.log("groupSize:" + groupSize)
+    datasets[0].data = Array.from({length: maxDataPoints}, (_, i) => {
+        const groupStart = i * groupSize;
+        const groupEnd = groupStart + groupSize;
+        console.log("groupStart: " + groupStart)
+        console.log("groupEnd: " + groupEnd)
+        const groupValues = datasets[0].data.slice(groupStart, groupEnd);
+        const groupSum = groupValues.reduce((sum, value) => sum + value, 0);
+        return groupSum / groupValues.length;
+    })
+    datasets[1].data = Array.from({length: maxDataPoints}, (_, i) => {
+        const groupStart = i * groupSize;
+        const groupEnd = groupStart + groupSize;
+        console.log("groupStart: " + groupStart)
+        console.log("groupEnd: " + groupEnd)
+        const groupValues = datasets[1].data.slice(groupStart, groupEnd);
+        const groupSum = groupValues.reduce((sum, value) => sum + value, 0);
+        return groupSum / groupValues.length;
+    })
+
     const data = {
         labels: dates,
         datasets: datasets
@@ -139,6 +178,11 @@ export function SDATFileDayChart(sdatFilesRaw: any) {
             options: {
                 plugins: {
                     zoom: zoomOptions,
+                },
+                scales: {
+                    y: {
+                        stacked: true
+                    }
                 }
             }
         }

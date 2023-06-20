@@ -12,6 +12,7 @@ enum TimeUnit {
 }
 
 interface FileDate {
+    fileName: string,
     fileCreationDate: string;
     startDate: string;
     endDate: string;
@@ -28,7 +29,6 @@ interface Observation {
 }
 
 interface SdatFile {
-    fileName: string;
     economicActivity: FileType;
     resolution: Resolution;
     measureUnit: MeasureUnit;
@@ -45,7 +45,9 @@ interface ChartData {
     data: number[]
 }
 
-function SDATFileDayChart(sdatFilesRaw: any) {
+let sdatFileChart = null
+
+export function SDATFileDayChart(sdatFilesRaw: any) {
     let jsonData: SdatWithFileDate[] = JSON.parse(sdatFilesRaw);
 
     const fileTypes: FileType[] = [];
@@ -105,9 +107,6 @@ function SDATFileDayChart(sdatFilesRaw: any) {
         }
     }
 
-    console.log("datasets", datasets)
-    console.log("amount dates", dates.length)
-
     const data = {
         labels: dates,
         datasets: datasets
@@ -130,9 +129,10 @@ function SDATFileDayChart(sdatFilesRaw: any) {
         }
     };
 
+
     // @ts-ignore
-    new Chart(
-        document.getElementById('sdat-file-chart'),
+     sdatFileChart = new Chart(
+        document.getElementById('sdat-file-chart') as HTMLCanvasElement,
         {
             type: 'line',
             data: data,
@@ -143,5 +143,10 @@ function SDATFileDayChart(sdatFilesRaw: any) {
             }
         }
     );
+
+
+}
+export function resetZoomChart() {
+    sdatFileChart.resetZoom()
 }
 

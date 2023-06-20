@@ -1,7 +1,7 @@
 package dev.groupb.m306groupb.utils;
 
-import dev.groupb.m306groupb.enums.MeasureUnit;
 import dev.groupb.m306groupb.enums.EconomicActivity;
+import dev.groupb.m306groupb.enums.MeasureUnit;
 import dev.groupb.m306groupb.enums.Unit;
 import dev.groupb.m306groupb.model.FileDate;
 import dev.groupb.m306groupb.model.Resolution;
@@ -70,6 +70,7 @@ public class SDATFileReader implements FileReader<SDATFile> {
                 }
             }
 
+            fileDate.setFileName(new String[]{file.getName()});
             return fileDate;
         } catch (ParserConfigurationException | IOException | SAXException | ParseException e) {
             throw new RuntimeException(e);
@@ -79,8 +80,6 @@ public class SDATFileReader implements FileReader<SDATFile> {
     @Override
     public SDATFile parseFile(File file) {
         return SDATFile.builder()
-                .fileName(file.getName())
-                .filePath(file.getAbsolutePath())
                 .economicActivity(findFileType(file))
                 .resolution(findResolution(file))
                 .measureUnit(findMeasureUnit(file))

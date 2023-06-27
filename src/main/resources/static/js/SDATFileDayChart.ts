@@ -83,7 +83,7 @@ export function SDATFileDayChart(sdatFilesRaw: any) {
         });
     }
 
-    let dates: string[] = [];
+    let dates: Date[] = [];
     for (let i = 0; i < jsonData.length; i++) {
         const sdatWithFileDate = jsonData[i];
         const startDate = sdatWithFileDate.fileDate.startDate;
@@ -102,37 +102,12 @@ export function SDATFileDayChart(sdatFilesRaw: any) {
             let minute = (observation.position - 1) * resolution.resolution;
             let newDate = new Date(startDate);
             newDate.setMinutes(newDate.getMinutes() + minute)
-
-            dates.push(newDate.toLocaleString())
+            dates.push(newDate)
         }
     }
-    
-    let mergedDates: string[] = [];
-    const maxDataPoints = 100;
-    const groupSize = Math.ceil(datasets[0].data.length / maxDataPoints);
-    console.log("groupSize:" + groupSize)
-    datasets[0].data = Array.from({length: maxDataPoints}, (_, i) => {
-        const groupStart = i * groupSize;
-        const groupEnd = groupStart + groupSize;
-        console.log("groupStart: " + groupStart)
-        console.log("groupEnd: " + groupEnd)
-        const groupValues = datasets[0].data.slice(groupStart, groupEnd);
-        const groupSum = groupValues.reduce((sum, value) => sum + value, 0);
-        mergedDates.push(dates[groupStart])
-        return groupSum / groupValues.length;
-    })
-    datasets[1].data = Array.from({length: maxDataPoints}, (_, i) => {
-        const groupStart = i * groupSize;
-        const groupEnd = groupStart + groupSize;
-        console.log("groupStart: " + groupStart)
-        console.log("groupEnd: " + groupEnd)
-        const groupValues = datasets[1].data.slice(groupStart, groupEnd);
-        const groupSum = groupValues.reduce((sum, value) => sum + value, 0);
-        return groupSum / groupValues.length;
-    })
 
     const data = {
-        labels: mergedDates,
+        labels: dates,
         datasets: datasets
     }
 
@@ -161,8 +136,32 @@ export function SDATFileDayChart(sdatFilesRaw: any) {
             type: 'line',
             data: data,
             options: {
+                indexAxis: 'x',
+                parsing: false,
+                normalized: true,
+                spanGaps: true,
+                scales: {
+                    x: {
+                        type: 'time',
+                        adapters: {
+                          date: {
+
+                          }
+                        },
+                        time: {
+                            displayFormats: {
+                                quarter: 'DD.MM.YYYY, hh:mm:ss'
+                            }
+                        }
+                    }
+                },
                 plugins: {
                     zoom: zoomOptions,
+                    decimation : {
+                        enabled: true,
+                        algorithm: 'lttb',
+                        samples: 50
+                    }
                 }
             }
         }

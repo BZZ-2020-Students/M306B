@@ -21,7 +21,6 @@ public class ESLCache {
     private final HashMap<FileDate, ESLFile> eslFileMap = new HashMap<>();
 
     private ESLCache() {
-
     }
 
     public static void fillCacheParallel(String filesPath) {

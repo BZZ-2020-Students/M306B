@@ -4,41 +4,59 @@
     <title>SDAT of Day</title>
     <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
     <link rel="stylesheet" th:href="@{/styles/style.css}"/>
+    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css'>
 </head>
 <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
 
 <script th:src="@{/js/chartjs.umd.js}"></script>
 <script th:src="@{/js/chartjs-plugin-zoom.min.js}"></script>
 <body>
-<div style="width: 100%;">
+<div class="main">
     <label>
         <select id="chart-selection-dropdown">
         </select>
     </label>
 
-    From: <label for="fromDate"></label><input id="fromDate" type="date"><br>
-    To: <label for="toDate"></label><input id="toDate" type="date"><br>
-
-    <a href="/files/uploadForm">Upload</a>
-
-    <label>
-        <select id="export-data-type-selection">
-            <option value="csv">CSV</option>
-            <option value="json">JSON</option>
-        </select>
-    </label>
-    <a href="#" id="export-data-link">Export selected Data</a>
-
-    <div style="width: 95%; height: 100%; margin: auto">
+    <div class="dates_container">
+        <div class="from">
+            <p class="from_text">From</p>
+            <label for="fromDate"></label><input id="fromDate" type="date"><br>
+        </div>
+        <div class="to">
+            <p class="to_text">To</p>
+            <label for="toDate"></label><input id="toDate" type="date"><br>
+        </div>
+    </div>
+    <div class="export_upload_container">
+        <div class="upload_with_drop_down">
+            <i class='fa fa-upload'></i>
+            <div class="upload">
+                <a href="/files/uploadForm">Upload</a>
+            </div>
+            <label>
+                <select id="export-data-type-selection">
+                    <option value="csv">CSV</option>
+                    <option value="json">JSON</option>
+                </select>
+            </label>
+        </div>
+        <div class="export">
+            <a href="#" id="export-data-link">
+                Export selected Data
+                <i class='fa fa-download'></i>
+            </a>
+        </div>
+    </div>
+    <div class="chart">
         <canvas id="sdat-file-chart"></canvas>
         <div id="footer">
             <button id="chartResetButton">Reset zoom</button>
         </div>
-
     </div>
 </div>
 </body>
 </html>
+
 <script th:inline="javascript" th:type="module">
     /*<![CDATA[*/
     let sdatFiles = /*[[${sdatFiles}]]*/ undefined;

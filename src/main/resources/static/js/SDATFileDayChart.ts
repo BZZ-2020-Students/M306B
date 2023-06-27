@@ -106,24 +106,8 @@ export function SDATFileDayChart(sdatFilesRaw: any) {
             dates.push(newDate.toLocaleString())
         }
     }
-
-
-    // const maxDataPoints = 100 / datasets[0].data.length;
-    // console.log("maxDataPoints: " + maxDataPoints )
-    // console.log("DATA LENGTH RAAAAA: " + datasets[0].data.length)
-    // const groupSize = datasets[0].data.length * maxDataPoints;
-    // console.log("groupSize:" + groupSize)
-    // const mergedData = Array.from({length: 100}, (_, i) => {
-    //     console.log("i: " + i)
-    //     const groupStart = i * groupSize;
-    //     console.log("groupStart: " + groupStart)
-    //     const groupEnd = groupStart + groupSize;
-    //     console.log("groupEnd: " + groupEnd)
-    //     const groupValues = datasets[0].data.slice(groupStart, groupEnd);
-    //     const groupSum = groupValues.reduce((sum, value) => sum + value, 0);
-    //     return groupSum / groupSize;
-    // });
-
+    
+    let mergedDates: string[] = [];
     const maxDataPoints = 100;
     const groupSize = Math.ceil(datasets[0].data.length / maxDataPoints);
     console.log("groupSize:" + groupSize)
@@ -134,6 +118,7 @@ export function SDATFileDayChart(sdatFilesRaw: any) {
         console.log("groupEnd: " + groupEnd)
         const groupValues = datasets[0].data.slice(groupStart, groupEnd);
         const groupSum = groupValues.reduce((sum, value) => sum + value, 0);
+        mergedDates.push(dates[groupStart])
         return groupSum / groupValues.length;
     })
     datasets[1].data = Array.from({length: maxDataPoints}, (_, i) => {
@@ -147,7 +132,7 @@ export function SDATFileDayChart(sdatFilesRaw: any) {
     })
 
     const data = {
-        labels: dates,
+        labels: mergedDates,
         datasets: datasets
     }
 
@@ -178,11 +163,6 @@ export function SDATFileDayChart(sdatFilesRaw: any) {
             options: {
                 plugins: {
                     zoom: zoomOptions,
-                },
-                scales: {
-                    y: {
-                        stacked: true
-                    }
                 }
             }
         }

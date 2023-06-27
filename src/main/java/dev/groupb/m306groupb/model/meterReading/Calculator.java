@@ -29,7 +29,7 @@ public class Calculator {
     }
 
     public void sortValues() {
-        HashMap<FileDate, ESLFile> eslFileHashMap = eslCache.getEslFileMap();
+        ConcurrentHashMap<FileDate, ESLFile> eslFileHashMap = eslCache.getEslFileMap();
         // sort by start date
         List<ESLFileWithDate> fileDateESLFilesList = new ArrayList<>(eslFileHashMap.entrySet().stream()
                 .map(fileDateEntry -> ESLFileWithDate
@@ -50,14 +50,16 @@ public class Calculator {
         calcuteValues(fileDateSdatFilesList, fileDateESLFilesList);
     }
 
-    public void calcuteValues(List<SDATFileWithDate> fileDateSdatFilesList, List<ESLFileWithDate> fileDateESLFilesList) {
+    public static void calcuteValues(List<SDATFileWithDate> fileDateSdatFilesList, List<ESLFileWithDate> fileDateESLFilesList) {
         if (fileDateESLFilesList.get(0).getFileDate().getStartDate().before(fileDateSdatFilesList.get(0).getFileDate().getStartDate())) {
+            System.out.println("Im if drin");
             int indexESLFiles = 0;
             int indexSDATFiles = 0;
             double valueConsumption = 0;
             double valueProduction = 0;
             MeterReadingCache meterReadingCache = MeterReadingCache.getInstance();
             for (; indexESLFiles < fileDateESLFilesList.size(); indexESLFiles++) {
+
                 valueConsumption = fileDateESLFilesList.get(indexESLFiles).getESLFiles().getHighTariffConsumption() + fileDateESLFilesList.get(indexESLFiles).getESLFiles().getLowTariffConsumption();
                 Calendar timeConsumption = Calendar.getInstance();
                 Calendar timeProduction = Calendar.getInstance();
@@ -81,6 +83,7 @@ public class Calculator {
                                     FileDate fileDate = FileDate.builder().startDate(timeProduction.getTime()).build();
                                     MeterReading meterReading = new MeterReading();
                                     meterReading.setValue(valueProduction);
+                                    System.out.println(valueProduction);
                                     meterReading.setType(EconomicActivity.Production);
                                     meterReadingCache.getObservationHashMap().put(fileDate, meterReading);
                                 }
@@ -97,6 +100,7 @@ public class Calculator {
                                     FileDate fileDate = FileDate.builder().startDate(timeConsumption.getTime()).build();
                                     MeterReading meterReading = new MeterReading();
                                     meterReading.setValue(valueConsumption);
+                                    System.out.println(valueConsumption);
                                     meterReading.setType(EconomicActivity.Consumption);
                                     meterReadingCache.getObservationHashMap().put(fileDate, meterReading);
                                 }
@@ -106,6 +110,7 @@ public class Calculator {
                 }
             }
         }
+        System.out.println("Nicht im if");
     }
 
     public LocalDate getDate() {

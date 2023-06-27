@@ -10,6 +10,7 @@ import lombok.Setter;
 import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Getter
 public class ESLCache {
@@ -18,7 +19,7 @@ public class ESLCache {
     @Setter(AccessLevel.NONE)
     private static ESLCache instance;
 
-    private final HashMap<FileDate, ESLFile> eslFileMap = new HashMap<>();
+    private final ConcurrentHashMap<FileDate, ESLFile> eslFileMap = new ConcurrentHashMap<>();
 
     private ESLCache() {
     }

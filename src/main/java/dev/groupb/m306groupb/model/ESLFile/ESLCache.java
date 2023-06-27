@@ -25,23 +25,12 @@ public class ESLCache {
     }
 
     public static void fillCacheParallel(String filesPath) {
-        ESLCache sdatCache = ESLCache.getInstance();
-        sdatCache.getEslFileMap().clear();
+        ESLCache eslCache = ESLCache.getInstance();
+        eslCache.getEslFileMap().clear();
 
-        ESLFileReader eslFileReader = new ESLFileReader();
         File[] files = FileReader.getFiles(filesPath);
 
-        Arrays.stream(files).parallel().forEach(file -> {
-            int amountOfESLFilesToExpect = eslFileReader.amountOfEslFiles(file);
-            for (int i = 0; i < amountOfESLFilesToExpect; i++) {
-                ESLFile eslFile = eslFileReader.parseFile(file, i);
-                if (eslFile == null) {
-                    continue;
-                }
-                FileDate fileDate = eslFileReader.getFileDate(file, i);
-                sdatCache.addESLFile(fileDate, eslFile);
-            }
-        });
+        Arrays.stream(files).parallel().forEach(ESLCache::addFileToCache);
     }
 
     public static ESLCache getInstance() {
@@ -49,6 +38,43 @@ public class ESLCache {
             instance = new ESLCache();
         }
         return instance;
+    }
+
+    private static void addFileToCache(File file) {
+        ESLFileReader eslFileReader = new ESLFileReader();
+        int amountOfESLFilesToExpect = eslFileReader.amountOfEslFiles(file);
+        for (int i = 0; i < amountOfESLFilesToExpect; i++) {
+            ESLFile eslFile = eslFileReader.parseFile(file, i);
+            if (eslFile == null) {
+                continue;
+            }
+            FileDate fileDate = eslFileReader.getFileDate(file, i);
+            ESLCache.getInstance().addESLFile(fileDate, eslFile);
+        }
+    }
+
+    public static void fileChanged(String fileName, File file) {
+        fileRemoved(fileName);
+        addFileToCache(file);
+    }
+
+    public static void addNewFile(File file) {
+        addFileToCache(file);
+    }
+
+    public static void fileRemoved(String fileName) {
+        ESLCache eslCache = ESLCache.getInstance();
+
+        FileDate[] fileDate = eslCache.getEslFileMap().keySet().stream().filter(key -> Arrays.asList(key.getFileName()).contains(fileName)).toArray(FileDate[]::new);
+
+        if (fileDate.length == 0) {
+            System.out.println("ESLFile not found in cache, can't remove: " + fileName);
+            return;
+        }
+
+        for (FileDate date : fileDate) {
+            eslCache.getEslFileMap().remove(date);
+        }
     }
 
     public void addESLFile(FileDate fileDate, ESLFile eslFile) {

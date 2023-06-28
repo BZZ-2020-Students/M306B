@@ -9,6 +9,8 @@
 
 <script th:src="@{/js/chartjs.umd.js}"></script>
 <script th:src="@{/js/chartjs-plugin-zoom.min.js}"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@^2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@^1"></script>
 <body>
 <div style="width: 100%;">
     <label>
@@ -33,6 +35,7 @@
         <canvas id="sdat-file-chart"></canvas>
         <div id="footer">
             <button id="chartResetButton">Reset zoom</button>
+            <button id="chartToggleDecimation">Toggle decimation</button>
         </div>
 
     </div>
@@ -91,10 +94,14 @@
     });
 
     import {setupHomeScreen} from "./js/SetupHomeScreen.js";
-    import {resetZoomChart} from "./js/SDATFileDayChart.js";
+    import {resetZoomChart, toggleDecimation} from "./js/SDATFileDayChart.js";
 
     document.getElementById('chartResetButton').addEventListener('click', (event) => {
         resetZoomChart()
+    })
+
+    document.getElementById('chartToggleDecimation').addEventListener('click', (event) => {
+        toggleDecimation()
     })
 
     let data = (sdatFiles !== undefined) ? sdatFiles : meterFiles;

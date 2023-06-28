@@ -40,15 +40,50 @@ interface SdatWithFileDate {
     sdatfiles: SdatFile[];
 }
 
+interface ChartSingleData {
+    x: Date,
+    y: number
+}
+
 interface ChartData {
-    label: FileType,
-    data: number[]
+    label: string,
+    data: ChartSingleData[],
 }
 
 let sdatFileChart = null
 
 export function SDATFileDayChart(sdatFilesRaw: any) {
     let jsonData: SdatWithFileDate[] = JSON.parse(sdatFilesRaw);
+
+    let dates: Date[] = [];
+    for (let i = 0; i < jsonData.length; i++) {
+        const sdatWithFileDate = jsonData[i];
+        const startDate = sdatWithFileDate.fileDate.startDate;
+
+        let longest_sdat_file = undefined;
+        for (let i = 0; i < sdatWithFileDate.sdatfiles.length; i++) {
+            const sdatFile = sdatWithFileDate.sdatfiles[i];
+            if (longest_sdat_file === undefined || sdatFile.observations.length > longest_sdat_file.observations.length) {
+                longest_sdat_file = sdatFile;
+            }
+        }
+
+        for (let i = 0; i < longest_sdat_file.observations.length; i++) {
+            const resolution = longest_sdat_file.resolution;
+            const observation = longest_sdat_file.observations[i];
+            let minute = (observation.position - 1) * resolution.resolution;
+            let newDate = new Date(startDate);
+            newDate.setMinutes(newDate.getMinutes() + minute)
+            dates.push(newDate)
+        }
+    }
+
+    const minDate = dates.reduce(function (a, b) {
+        return a < b ? a : b;
+    });
+    const maxDate = dates.reduce(function (a, b) {
+        return a > b ? a : b;
+    });
 
     const fileTypes: FileType[] = [];
     for (let i = 0; i < jsonData.length; i++) {
@@ -64,7 +99,8 @@ export function SDATFileDayChart(sdatFilesRaw: any) {
     const datasets: ChartData[] = [];
     for (let i = 0; i < fileTypes.length; i++) {
         const fileType = fileTypes[i];
-        const data: number[] = [];
+        const data: ChartSingleData[] = [];
+        let dateCounter = 0;
         for (let j = 0; j < jsonData.length; j++) {
             const sdatWithFileDate = jsonData[j];
             for (let k = 0; k < sdatWithFileDate.sdatfiles.length; k++) {
@@ -72,44 +108,23 @@ export function SDATFileDayChart(sdatFilesRaw: any) {
                 if (sdatFile.economicActivity === fileType) {
                     for (let l = 0; l < sdatFile.observations.length; l++) {
                         const observation = sdatFile.observations[l];
-                        data.push(observation.volume);
+                        const date = dates[dateCounter++];
+                        data.push({
+                            x: date,
+                            y: observation.volume
+                        })
                     }
                 }
             }
         }
+        console.log("done with " + fileType + " data, counter: " + dateCounter);
         datasets.push({
             label: fileType,
             data: data
         });
     }
 
-    let dates: Date[] = [];
-    for (let i = 0; i < jsonData.length; i++) {
-        const sdatWithFileDate = jsonData[i];
-        const startDate = sdatWithFileDate.fileDate.startDate;
-
-        let longest_sdat_file = undefined;
-        for (let j = 0; j < sdatWithFileDate.sdatfiles.length; j++) {
-            const sdatFile = sdatWithFileDate.sdatfiles[j];
-            if (longest_sdat_file === undefined || sdatFile.observations.length > longest_sdat_file.observations.length) {
-                longest_sdat_file = sdatFile;
-            }
-        }
-
-        for (let j = 0; j < longest_sdat_file.observations.length; j++) {
-            const resolution = longest_sdat_file.resolution;
-            const observation = longest_sdat_file.observations[j];
-            let minute = (observation.position - 1) * resolution.resolution;
-            let newDate = new Date(startDate);
-            newDate.setMinutes(newDate.getMinutes() + minute)
-            dates.push(newDate)
-        }
-    }
-
-    const data = {
-        labels: dates,
-        datasets: datasets
-    }
+    console.log(datasets)
 
     const zoomOptions = {
         pan: {
@@ -118,6 +133,9 @@ export function SDATFileDayChart(sdatFilesRaw: any) {
             modifierKey: 'ctrl',
         },
         zoom: {
+            wheel: {
+                enabled: true,
+            },
             mode: 'x',
             drag: {
                 enabled: true,
@@ -128,48 +146,69 @@ export function SDATFileDayChart(sdatFilesRaw: any) {
         }
     };
 
-
     // @ts-ignore
-     sdatFileChart = new Chart(
+    sdatFileChart = new Chart(
         document.getElementById('sdat-file-chart') as HTMLCanvasElement,
         {
             type: 'line',
-            data: data,
+            data: {
+                datasets: [{
+                    label: datasets[0].label,
+                    data: datasets[0].data,
+                }, {
+                    label: datasets[1].label,
+                    data: datasets[1].data,
+                }]
+            },
             options: {
                 indexAxis: 'x',
                 parsing: false,
-                normalized: true,
-                spanGaps: true,
+                plugins: {
+                    zoom: zoomOptions,
+                    decimation: {
+                        enabled: true,
+                        algorithm: 'lttb',
+                    }
+                },
                 scales: {
                     x: {
                         type: 'time',
-                        adapters: {
-                          date: {
-
-                          }
+                        suggestedMin: minDate,
+                        suggestedMax: maxDate,
+                        ticks: {
+                            source: 'data',
+                            autoSkip: true,
+                            maxRotation: 0,
                         },
                         time: {
                             displayFormats: {
-                                quarter: 'DD.MM.YYYY, hh:mm:ss'
+                                'day': 'DD.MM.YYYY, hh:mm:ss',
+                                'hour': 'DD.MM.YYYY, hh:mm:ss',
+                                'minute': 'hh:mm:ss',
+                                'second': 'hh:mm:ss',
+                                'millisecond': 'hh:mm:ss',
+                                'week': 'MMM DD',
+                                'month': 'MMM DD',
+                                'quarter': 'MMM DD',
+                                'year': 'MMM DD',
                             }
                         }
-                    }
-                },
-                plugins: {
-                    zoom: zoomOptions,
-                    decimation : {
-                        enabled: true,
-                        algorithm: 'lttb',
-                        samples: 50
                     }
                 }
             }
         }
     );
 
-
+    console.log(sdatFileChart)
 }
+
 export function resetZoomChart() {
     sdatFileChart.resetZoom()
 }
 
+export function toggleDecimation() {
+    const currentDecimation = sdatFileChart.options.plugins.decimation.enabled;
+    const newDecimation = !currentDecimation;
+    console.log(newDecimation)
+    sdatFileChart.options.plugins.decimation.enabled = newDecimation;
+}

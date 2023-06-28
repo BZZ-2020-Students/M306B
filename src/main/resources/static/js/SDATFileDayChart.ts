@@ -99,13 +99,13 @@ export function SDATFileDayChart(sdatFilesRaw: any) {
     }
 
     let datasets: ChartData[] = [];
-
     for (let i = 0; i < fileTypes.length; i++) {
         const fileType = fileTypes[i];
         let data: ChartSingleData[] = [];
         for (let j = 0; j < dates.length; j++) {
             const date = dates[j];
             let volume = 0;
+            let observationCount = 0;
             for (let k = 0; k < jsonData.length; k++) {
                 const sdatWithFileDate = jsonData[k];
                 for (let l = 0; l < sdatWithFileDate.sdatfiles.length; l++) {
@@ -117,15 +117,21 @@ export function SDATFileDayChart(sdatFilesRaw: any) {
                             let newDate = new Date(sdatWithFileDate.fileDate.startDate);
                             newDate.setMinutes(newDate.getMinutes() + minute)
                             if (newDate.getTime() === date.getTime()) {
-                                volume += observation.volume;
+                                if (observationCount === 0) {
+                                    volume += observation.volume;
+                                }
+                                observationCount++;
                             }
                         }
                     }
                 }
             }
-            data.push({x: date, y: volume});
+            if (observationCount > 1) {
+                console.warn(`Warning: Found ${observationCount} observations for ${fileType} on ${date}. Skipping duplicates.`);
+            }
+            data.push({ x: date, y: volume });
         }
-        datasets.push({label: fileType, data: data});
+        datasets.push({ label: fileType, data: data });
     }
 
     console.log(datasets)

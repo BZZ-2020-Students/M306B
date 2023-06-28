@@ -120,7 +120,7 @@ export function SDATFileDayChart(sdatFilesRaw: any) {
         console.log("done with " + fileType + " data, counter: " + dateCounter);
         datasets.push({
             label: fileType,
-            data: data
+            data: data,
         });
     }
 
@@ -158,7 +158,7 @@ export function SDATFileDayChart(sdatFilesRaw: any) {
                 }, {
                     label: datasets[1].label,
                     data: datasets[1].data,
-                }]
+                }],
             },
             options: {
                 indexAxis: 'x',

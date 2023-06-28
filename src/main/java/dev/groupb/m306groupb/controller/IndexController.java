@@ -37,7 +37,7 @@ public class IndexController {
                 try {
                     ConcurrentHashMap<FileDate, SDATFile[]> sdatFileHashMap = sdatCache.getSdatFileHashMap();
                     // sort by start date
-                    List<SDATFileWithDate> fileDateSdatFilesList = new java.util.ArrayList<>(sdatFileHashMap.entrySet().stream().parallel()
+                    List<SDATFileWithDate> fileDateSdatFilesList = new java.util.ArrayList<>(sdatFileHashMap.entrySet().stream()
                             .map(entry -> SDATFileWithDate.builder().fileDate(entry.getKey()).SDATFiles(entry.getValue()).build())
                             .toList());
                     fileDateSdatFilesList.sort(SDATFileWithDate::compareTo);
@@ -77,6 +77,8 @@ public class IndexController {
                                 .filter(sdatFileWithDate -> !sdatFileWithDate.getFileDate().getStartDate().before(earliestDate) && !sdatFileWithDate.getFileDate().getStartDate().after(inclusiveLatestDate))
                                 .toList());
                     }
+
+                    fileDateSdatFilesList.sort(SDATFileWithDate::compareTo);
 
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat(GlobalStuff.SDAT_DATE_FORMAT);
                     ObjectMapper objectMapper = new ObjectMapper();

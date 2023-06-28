@@ -1,5 +1,6 @@
 package dev.groupb.m306groupb.model.SDATFile;
 
+import dev.groupb.m306groupb.enums.EconomicActivity;
 import dev.groupb.m306groupb.model.FileDate;
 import dev.groupb.m306groupb.utils.FileReader;
 import dev.groupb.m306groupb.utils.SDATFileReader;
@@ -110,6 +111,12 @@ public class SDATCache {
             existingFileDate.setFileName(newFileName);
 
             sdatFileHashMap.put(existingFileDate, newExisting);
+
+
+            assert newExisting.length == 2;
+            EconomicActivity firstEconomicActivity = newExisting[0].getEconomicActivity();
+            EconomicActivity secondEconomicActivity = newExisting[1].getEconomicActivity();
+            assert firstEconomicActivity != secondEconomicActivity;
         } else {
             sdatFileHashMap.put(fileDate, new SDATFile[]{sdatFile});
         }

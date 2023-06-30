@@ -1,6 +1,7 @@
 package dev.groupb.m306groupb.model.SDATFile;
 
 import dev.groupb.m306groupb.enums.EconomicActivity;
+import dev.groupb.m306groupb.enums.Unit;
 import dev.groupb.m306groupb.model.FileDate;
 import dev.groupb.m306groupb.utils.FileReader;
 import dev.groupb.m306groupb.utils.SDATFileReader;
@@ -9,6 +10,8 @@ import lombok.Getter;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Getter
@@ -93,6 +96,8 @@ public class SDATCache {
     }
 
     public void addSDATFile(FileDate fileDate, SDATFile sdatFile) {
+        updateDatesOfObservations(fileDate,sdatFile);
+
         SDATFile[] existing = sdatFileHashMap.get(fileDate);
         FileDate existingFileDate = sdatFileHashMap.keySet().stream().filter(key -> key.equals(fileDate)).findFirst().orElse(null);
         if (existing != null) {
@@ -101,6 +106,7 @@ public class SDATCache {
             newExisting[existing.length] = sdatFile;
 
             if (existingFileDate == null) {
+                System.err.println("Existing file date is null");
                 sdatFileHashMap.put(fileDate, newExisting);
                 return;
             }
@@ -117,8 +123,30 @@ public class SDATCache {
             EconomicActivity firstEconomicActivity = newExisting[0].getEconomicActivity();
             EconomicActivity secondEconomicActivity = newExisting[1].getEconomicActivity();
             assert firstEconomicActivity != secondEconomicActivity;
+
+
         } else {
             sdatFileHashMap.put(fileDate, new SDATFile[]{sdatFile});
+        }
+    }
+
+    private void updateDatesOfObservations(FileDate fileDate, SDATFile sdatFile) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(fileDate.getStartDate());
+        int resolution = sdatFile.getResolution().getResolution();
+        Unit timeUnit = sdatFile.getResolution().getTimeUnit();
+
+        int obsCounter = 0;
+        for (Observation observation : sdatFile.getObservations()) {
+            if (obsCounter >= 1) {
+                if (Objects.requireNonNull(timeUnit) == Unit.MIN) {
+                    calendar.add(Calendar.MINUTE, resolution);
+                }
+            } else {
+                obsCounter++;
+            }
+
+            observation.setRelativeTime(calendar.getTime());
         }
     }
 }

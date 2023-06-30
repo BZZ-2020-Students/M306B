@@ -1,6 +1,5 @@
 package dev.groupb.m306groupb.model.SDATFile;
 
-import dev.groupb.m306groupb.enums.EconomicActivity;
 import dev.groupb.m306groupb.enums.Unit;
 import dev.groupb.m306groupb.model.FileDate;
 import dev.groupb.m306groupb.utils.FileReader;
@@ -102,17 +101,10 @@ public class SDATCache {
         FileDate existingFileDate = sdatFileHashMap.keySet().stream().filter(key -> key.equals(fileDate)).findFirst().orElse(null);
         if (existing != null) {
             // Check if the new SDATFile is a duplicate
-            boolean isDuplicate = false;
-            for (SDATFile existingSDATFile : existing) {
-                if (existingSDATFile.getEconomicActivity() == sdatFile.getEconomicActivity()) {
-                    isDuplicate = true;
-                    break;
-                }
-            }
+            boolean isDuplicate = Arrays.stream(existing).anyMatch(existingSDATFile -> existingSDATFile.getEconomicActivity() == sdatFile.getEconomicActivity());
             // If it's not a duplicate, add it to the cache
             if (!isDuplicate) {
-                SDATFile[] newExisting = new SDATFile[existing.length + 1];
-                System.arraycopy(existing, 0, newExisting, 0, existing.length);
+                SDATFile[] newExisting = Arrays.copyOf(existing, existing.length + 1);
                 newExisting[existing.length] = sdatFile;
 
                 if (existingFileDate == null) {
@@ -121,30 +113,19 @@ public class SDATCache {
                     return;
                 }
                 // add to the existingFileDate the fileName from the fileDate
-                String[] newFileName = new String[existingFileDate.getFileName().length + 1];
-                System.arraycopy(existingFileDate.getFileName(), 0, newFileName, 0, existingFileDate.getFileName().length);
+                String[] newFileName = Arrays.copyOf(existingFileDate.getFileName(), existingFileDate.getFileName().length + 1);
                 newFileName[existingFileDate.getFileName().length] = fileDate.getFileName()[0];
                 existingFileDate.setFileName(newFileName);
 
-                if (newFileName.length != 2 || newExisting.length != 2) {
-                    System.err.println("We have more than 2 files with the same date (" + fileDate.getStartDate() + "), this should not happen. Please check the files. The files are: " + Arrays.toString(newFileName) + "\nSkipping this file.");
-                    return;
-                }
-                EconomicActivity firstEconomicActivity = newExisting[0].getEconomicActivity();
-                EconomicActivity secondEconomicActivity = newExisting[1].getEconomicActivity();
-
-                if (firstEconomicActivity == secondEconomicActivity) {
-                    throw new RuntimeException("firstEconomicActivity == secondEconomicActivity");
-                }
-
                 sdatFileHashMap.put(existingFileDate, newExisting);
             } else {
-                System.err.println("Warning: There is already an SDATFile with the same EconomicActivity for this FileDate. Cannot add another.");
+                System.err.println("Warning: There is already an SDATFile with the EconomicActivity " + sdatFile.getEconomicActivity() + " for this FileDate (" + fileDate.getStartDate() + "). Cannot add another. The file name is: " + Arrays.toString(fileDate.getFileName()));
             }
         } else {
             sdatFileHashMap.put(fileDate, new SDATFile[]{sdatFile});
         }
     }
+
 
     private void updateDatesOfObservations(FileDate fileDate, SDATFile sdatFile) {
         Calendar calendar = Calendar.getInstance();

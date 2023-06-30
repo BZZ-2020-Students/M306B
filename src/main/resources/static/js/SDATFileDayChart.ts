@@ -58,7 +58,8 @@ export function SDATFileDayChart(sdatFilesRaw: any) {
     console.log(jsonData)
 
     const minDate = new Date(jsonData[0].fileDate.startDate);
-    const maxDate = new Date(jsonData[0].fileDate.endDate);
+    const maxDate = new Date(jsonData[jsonData.length - 1].fileDate.startDate);
+    maxDate.setDate(maxDate.getDate() + 1);
     console.log(minDate)
     console.log(maxDate)
 

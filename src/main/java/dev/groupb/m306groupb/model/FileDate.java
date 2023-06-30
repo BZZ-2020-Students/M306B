@@ -37,9 +37,6 @@ public class FileDate implements Comparable<FileDate> {
 
     @Override
     public int hashCode() {
-        int result = getFileCreationDate() != null ? getFileCreationDate().hashCode() : 0;
-        result = 31 * result + (getStartDate() != null ? getStartDate().hashCode() : 0);
-        result = 31 * result + (getEndDate() != null ? getEndDate().hashCode() : 0);
-        return result;
+        return Objects.hash(startDate);
     }
 }

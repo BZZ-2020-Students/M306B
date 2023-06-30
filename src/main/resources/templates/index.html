@@ -35,7 +35,8 @@
         <canvas id="sdat-file-chart"></canvas>
         <div id="footer">
             <button id="chartResetButton">Reset zoom</button>
-            <button id="chartToggleDecimation">Toggle decimation</button>
+            <button id="chartToggleDecimation">Disable Decimation</button>
+            <button id="chartToggleAnimation">Enable Animations</button>
         </div>
 
     </div>
@@ -94,14 +95,18 @@
     });
 
     import {setupHomeScreen} from "./js/SetupHomeScreen.js";
-    import {resetZoomChart, toggleDecimation} from "./js/SDATFileDayChart.js";
+    import {resetZoomChart, toggleDecimation, toggleAnimation} from "./js/SDATFileDayChart.js";
 
-    document.getElementById('chartResetButton').addEventListener('click', (event) => {
+    document.getElementById('chartResetButton').addEventListener('click', () => {
         resetZoomChart()
     })
 
-    document.getElementById('chartToggleDecimation').addEventListener('click', (event) => {
+    document.getElementById('chartToggleDecimation').addEventListener('click', () => {
         toggleDecimation()
+    })
+
+    document.getElementById('chartToggleAnimation').addEventListener('click', () => {
+        toggleAnimation()
     })
 
     let data = (sdatFiles !== undefined) ? sdatFiles : meterFiles;

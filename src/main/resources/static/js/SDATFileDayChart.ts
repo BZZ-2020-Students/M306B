@@ -110,7 +110,7 @@ export function SDATFileDayChart(sdatFilesRaw: any) {
                 parsing: false,
                 normalized: true,
                 spanGaps: true,
-                // animation: false,
+                animation: false,
                 plugins: {
                     zoom: zoomOptions,
                     decimation: {
@@ -159,4 +159,17 @@ export function toggleDecimation() {
     console.log(newDecimation)
     sdatFileChart.options.plugins.decimation.enabled = newDecimation;
     sdatFileChart.update();
+
+    const decimationButton = document.getElementById('chartToggleDecimation');
+    decimationButton.innerText = newDecimation ? 'Disable Decimation' : 'Enable Decimation';
+}
+
+export function toggleAnimation() {
+    const currentAnimation = sdatFileChart.options.animation;
+    const newAnimation = !currentAnimation;
+    console.log(newAnimation)
+    sdatFileChart.options.animation = newAnimation;
+
+    const animationButton = document.getElementById('chartToggleAnimation');
+    animationButton.innerText = newAnimation ? 'Disable Animation' : 'Enable Animation';
 }

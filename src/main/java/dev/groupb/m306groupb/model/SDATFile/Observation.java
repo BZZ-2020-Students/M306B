@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -12,6 +14,7 @@ import lombok.NoArgsConstructor;
 public class Observation implements Comparable<Observation> {
     private Integer position;
     private Double volume;
+    private long relativeTime;
 
     @Override
     public int compareTo(Observation o) {

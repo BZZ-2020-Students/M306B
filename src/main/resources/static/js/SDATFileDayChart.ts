@@ -26,6 +26,7 @@ interface Resolution {
 interface Observation {
     position: number;
     volume: number;
+    relativeTime: number;
 }
 
 interface SdatFile {
@@ -40,9 +41,14 @@ interface SdatWithFileDate {
     sdatfiles: SdatFile[];
 }
 
+interface ChartSingleData {
+    x: number,
+    y: number
+}
+
 interface ChartData {
-    label: FileType,
-    data: number[]
+    label: string,
+    data: ChartSingleData[],
 }
 
 let sdatFileChart = null
@@ -50,67 +56,9 @@ let sdatFileChart = null
 export function SDATFileDayChart(sdatFilesRaw: any) {
     let jsonData: SdatWithFileDate[] = JSON.parse(sdatFilesRaw);
 
-    const fileTypes: FileType[] = [];
-    for (let i = 0; i < jsonData.length; i++) {
-        const sdatWithFileDate = jsonData[i];
-        for (let j = 0; j < sdatWithFileDate.sdatfiles.length; j++) {
-            const sdatFile = sdatWithFileDate.sdatfiles[j];
-            if (fileTypes.indexOf(sdatFile.economicActivity) === -1) {
-                fileTypes.push(sdatFile.economicActivity);
-            }
-        }
-    }
-
-    const datasets: ChartData[] = [];
-    for (let i = 0; i < fileTypes.length; i++) {
-        const fileType = fileTypes[i];
-        const data: number[] = [];
-        for (let j = 0; j < jsonData.length; j++) {
-            const sdatWithFileDate = jsonData[j];
-            for (let k = 0; k < sdatWithFileDate.sdatfiles.length; k++) {
-                const sdatFile = sdatWithFileDate.sdatfiles[k];
-                if (sdatFile.economicActivity === fileType) {
-                    for (let l = 0; l < sdatFile.observations.length; l++) {
-                        const observation = sdatFile.observations[l];
-                        data.push(observation.volume);
-                    }
-                }
-            }
-        }
-        datasets.push({
-            label: fileType,
-            data: data
-        });
-    }
-
-    let dates: string[] = [];
-    for (let i = 0; i < jsonData.length; i++) {
-        const sdatWithFileDate = jsonData[i];
-        const startDate = sdatWithFileDate.fileDate.startDate;
-
-        let longest_sdat_file = undefined;
-        for (let j = 0; j < sdatWithFileDate.sdatfiles.length; j++) {
-            const sdatFile = sdatWithFileDate.sdatfiles[j];
-            if (longest_sdat_file === undefined || sdatFile.observations.length > longest_sdat_file.observations.length) {
-                longest_sdat_file = sdatFile;
-            }
-        }
-
-        for (let j = 0; j < longest_sdat_file.observations.length; j++) {
-            const resolution = longest_sdat_file.resolution;
-            const observation = longest_sdat_file.observations[j];
-            let minute = (observation.position - 1) * resolution.resolution;
-            let newDate = new Date(startDate);
-            newDate.setMinutes(newDate.getMinutes() + minute)
-
-            dates.push(newDate.toLocaleString())
-        }
-    }
-
-    const data = {
-        labels: dates,
-        datasets: datasets
-    }
+    const minDate = new Date(jsonData[0].fileDate.startDate);
+    const maxDate = new Date(jsonData[jsonData.length - 1].fileDate.startDate);
+    maxDate.setDate(maxDate.getDate() + 1);
 
     const zoomOptions = {
         pan: {
@@ -119,6 +67,9 @@ export function SDATFileDayChart(sdatFilesRaw: any) {
             modifierKey: 'ctrl',
         },
         zoom: {
+            wheel: {
+                enabled: true,
+            },
             mode: 'x',
             drag: {
                 enabled: true,
@@ -129,24 +80,94 @@ export function SDATFileDayChart(sdatFilesRaw: any) {
         }
     };
 
+    let datasets: ChartData[] = [];
+    for (let sdatWithFileDate of jsonData) {
+        for (let sdatFile of sdatWithFileDate.sdatfiles) {
+            let dataset = datasets.find(dataset => dataset.label === sdatFile.economicActivity);
+            if (!dataset) {
+                dataset = {label: sdatFile.economicActivity, data: []};
+                datasets.push(dataset);
+            }
+            for (let observation of sdatFile.observations) {
+                dataset.data.push({
+                    x: observation.relativeTime,
+                    y: observation.volume
+                });
+            }
+        }
+    }
 
     // @ts-ignore
-     sdatFileChart = new Chart(
+    sdatFileChart = new Chart(
         document.getElementById('sdat-file-chart') as HTMLCanvasElement,
         {
             type: 'line',
-            data: data,
+            data: {
+                datasets: datasets,
+            },
             options: {
+                indexAxis: 'x',
+                parsing: false,
+                normalized: true,
+                spanGaps: true,
+                animation: false,
                 plugins: {
                     zoom: zoomOptions,
+                    decimation: {
+                        enabled: true,
+                        algorithm: 'lttb',
+                        samples: 500,
+                    }
+                },
+                scales: {
+                    x: {
+                        type: 'time',
+                        suggestedMin: minDate,
+                        suggestedMax: maxDate,
+                        ticks: {
+                            source: 'auto',
+                            autoSkip: true,
+                            maxRotation: 0,
+                        },
+                        time: {
+                            displayFormats: {
+                                'millisecond': 'hh:mm:ss',
+                                'second': 'hh:mm:ss',
+                                'minute': 'hh:mm:ss',
+                                'hour': 'DD.MM.YYYY, hh:mm:ss',
+                                'day': 'DD.MM.YYYY, hh:mm:ss',
+                                'week': 'MMM DD',
+                                'month': 'MMM DD YYYY',
+                                'quarter': 'MMM DD YYYY',
+                                'year': 'MMM DD YYYY',
+                            }
+                        }
+                    }
                 }
             }
         }
     );
-
-
 }
+
 export function resetZoomChart() {
     sdatFileChart.resetZoom()
 }
 
+export function toggleDecimation() {
+    const currentDecimation = sdatFileChart.options.plugins.decimation.enabled;
+    const newDecimation = !currentDecimation;
+    sdatFileChart.options.plugins.decimation.enabled = newDecimation;
+    sdatFileChart.update();
+
+    const decimationButton = document.getElementById('chartToggleDecimation');
+    decimationButton.innerText = newDecimation ? 'Disable Decimation' : 'Enable Decimation';
+}
+
+export function toggleAnimation() {
+    const currentAnimation = sdatFileChart.options.animation;
+    const newAnimation = !currentAnimation;
+    sdatFileChart.options.animation = newAnimation;
+
+    const animationButton = document.getElementById('chartToggleAnimation');
+    animationButton.innerText = newAnimation ? 'Disable Animation' : 'Enable Animation';
+}

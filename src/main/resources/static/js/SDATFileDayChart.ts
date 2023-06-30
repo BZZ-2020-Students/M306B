@@ -26,7 +26,7 @@ interface Resolution {
 interface Observation {
     position: number;
     volume: number;
-    relativeTime: string;
+    relativeTime: number;
 }
 
 interface SdatFile {
@@ -42,7 +42,7 @@ interface SdatWithFileDate {
 }
 
 interface ChartSingleData {
-    x: Date,
+    x: number,
     y: number
 }
 
@@ -55,13 +55,10 @@ let sdatFileChart = null
 
 export function SDATFileDayChart(sdatFilesRaw: any) {
     let jsonData: SdatWithFileDate[] = JSON.parse(sdatFilesRaw);
-    console.log(jsonData)
 
     const minDate = new Date(jsonData[0].fileDate.startDate);
     const maxDate = new Date(jsonData[jsonData.length - 1].fileDate.startDate);
     maxDate.setDate(maxDate.getDate() + 1);
-    console.log(minDate)
-    console.log(maxDate)
 
     const zoomOptions = {
         pan: {
@@ -83,17 +80,17 @@ export function SDATFileDayChart(sdatFilesRaw: any) {
         }
     };
 
-    const datasets: ChartData[] = [];
-    for (const sdatWithFileDate of jsonData) {
-        for (const sdatFile of sdatWithFileDate.sdatfiles) {
+    let datasets: ChartData[] = [];
+    for (let sdatWithFileDate of jsonData) {
+        for (let sdatFile of sdatWithFileDate.sdatfiles) {
             let dataset = datasets.find(dataset => dataset.label === sdatFile.economicActivity);
             if (!dataset) {
                 dataset = {label: sdatFile.economicActivity, data: []};
                 datasets.push(dataset);
             }
-            for (const observation of sdatFile.observations) {
+            for (let observation of sdatFile.observations) {
                 dataset.data.push({
-                    x: new Date(observation.relativeTime),
+                    x: observation.relativeTime,
                     y: observation.volume
                 });
             }
@@ -113,8 +110,14 @@ export function SDATFileDayChart(sdatFilesRaw: any) {
                 parsing: false,
                 normalized: true,
                 spanGaps: true,
+                // animation: false,
                 plugins: {
                     zoom: zoomOptions,
+                    decimation: {
+                        enabled: true,
+                        algorithm: 'lttb',
+                        samples: 1000,
+                    }
                 },
                 scales: {
                     x: {
@@ -155,4 +158,5 @@ export function toggleDecimation() {
     const newDecimation = !currentDecimation;
     console.log(newDecimation)
     sdatFileChart.options.plugins.decimation.enabled = newDecimation;
+    sdatFileChart.update();
 }

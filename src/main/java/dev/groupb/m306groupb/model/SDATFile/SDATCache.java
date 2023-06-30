@@ -143,7 +143,7 @@ public class SDATCache {
                 obsCounter++;
             }
 
-            observation.setRelativeTime(calendar.getTime());
+            observation.setRelativeTime(calendar.getTimeInMillis());
         }
     }
 }

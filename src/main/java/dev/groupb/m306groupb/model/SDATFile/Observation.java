@@ -14,7 +14,7 @@ import java.util.Date;
 public class Observation implements Comparable<Observation> {
     private Integer position;
     private Double volume;
-    private Date relativeTime;
+    private long relativeTime;
 
     @Override
     public int compareTo(Observation o) {

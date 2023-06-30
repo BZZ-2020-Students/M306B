@@ -59,7 +59,8 @@ export function SDATFileDayChart(sdatFilesRaw: any) {
 
     const minDate = new Date(jsonData[0].fileDate.startDate);
     const maxDate = new Date(jsonData[0].fileDate.endDate);
-
+    console.log(minDate)
+    console.log(maxDate)
 
     const zoomOptions = {
         pan: {
@@ -109,12 +110,10 @@ export function SDATFileDayChart(sdatFilesRaw: any) {
             options: {
                 indexAxis: 'x',
                 parsing: false,
+                normalized: true,
+                spanGaps: true,
                 plugins: {
                     zoom: zoomOptions,
-                    decimation: {
-                        enabled: true,
-                        algorithm: 'lttb',
-                    }
                 },
                 scales: {
                     x: {

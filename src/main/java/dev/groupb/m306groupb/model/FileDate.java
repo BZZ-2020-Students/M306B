@@ -6,13 +6,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
+import java.util.Objects;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class FileDate implements Comparable<FileDate> {
-    private String[] fileName; // Because for example SDAT files are twice per date, but have different names.
+    private String[] fileName;
     private Date fileCreationDate;
     private Date startDate;
     private Date endDate;
@@ -23,17 +24,15 @@ public class FileDate implements Comparable<FileDate> {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        FileDate fileDate = (FileDate) o;
-
-        if (getFileCreationDate() != null ? !getFileCreationDate().equals(fileDate.getFileCreationDate()) : fileDate.getFileCreationDate() != null)
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
-        if (getStartDate() != null ? !getStartDate().equals(fileDate.getStartDate()) : fileDate.getStartDate() != null)
-            return false;
-        return getEndDate() != null ? getEndDate().equals(fileDate.getEndDate()) : fileDate.getEndDate() == null;
+        }
+        FileDate other = (FileDate) obj;
+        return Objects.equals(startDate, other.startDate);
     }
 
     @Override

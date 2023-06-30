@@ -25,6 +25,14 @@ public class SDATCache {
     private SDATCache() {
     }
 
+    public static SDATCache getInstance() {
+        if (instance == null) {
+            instance = new SDATCache();
+        }
+
+        return instance;
+    }
+
     public static void fillCacheParallel(String filesPath) {
         SDATCache sdatCache = SDATCache.getInstance();
         sdatCache.getSdatFileHashMap().clear();
@@ -53,14 +61,6 @@ public class SDATCache {
 
             sdatCache.addSDATFile(fileDate, sdatFile);
         }
-    }
-
-    public static SDATCache getInstance() {
-        if (instance == null) {
-            instance = new SDATCache();
-        }
-
-        return instance;
     }
 
     private static void addFileToCache(File file) {
@@ -96,7 +96,7 @@ public class SDATCache {
     }
 
     public void addSDATFile(FileDate fileDate, SDATFile sdatFile) {
-        updateDatesOfObservations(fileDate,sdatFile);
+        updateDatesOfObservations(fileDate, sdatFile);
 
         SDATFile[] existing = sdatFileHashMap.get(fileDate);
         FileDate existingFileDate = sdatFileHashMap.keySet().stream().filter(key -> key.equals(fileDate)).findFirst().orElse(null);
@@ -116,15 +116,18 @@ public class SDATCache {
             newFileName[existingFileDate.getFileName().length] = fileDate.getFileName()[0];
             existingFileDate.setFileName(newFileName);
 
-            sdatFileHashMap.put(existingFileDate, newExisting);
-
-
-            assert newExisting.length == 2;
+            if (newFileName.length != 2 || newExisting.length != 2) {
+                System.err.println("We have more than 2 files with the same date (" + fileDate.getStartDate() + "), this should not happen. Please check the files. The files are: " + Arrays.toString(newFileName) + "\nSkipping this file.");
+                return;
+            }
             EconomicActivity firstEconomicActivity = newExisting[0].getEconomicActivity();
             EconomicActivity secondEconomicActivity = newExisting[1].getEconomicActivity();
-            assert firstEconomicActivity != secondEconomicActivity;
 
+            if (firstEconomicActivity == secondEconomicActivity) {
+                throw new RuntimeException("firstEconomicActivity == secondEconomicActivity");
+            }
 
+            sdatFileHashMap.put(existingFileDate, newExisting);
         } else {
             sdatFileHashMap.put(fileDate, new SDATFile[]{sdatFile});
         }

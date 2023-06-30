@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.groupb.m306groupb.enums.DiagramTypes;
 import dev.groupb.m306groupb.model.FileDate;
+import dev.groupb.m306groupb.model.SDATFile.Observation;
 import dev.groupb.m306groupb.model.SDATFile.SDATCache;
 import dev.groupb.m306groupb.model.SDATFile.SDATFile;
 import dev.groupb.m306groupb.model.SDATFile.SDATFileWithDate;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -79,6 +81,17 @@ public class IndexController {
                     }
 
                     fileDateSdatFilesList.sort(SDATFileWithDate::compareTo);
+
+                    // debug
+                    for (SDATFileWithDate sdatFileWithDate : fileDateSdatFilesList) {
+                        System.out.println("FileDateStartDate: " + sdatFileWithDate.getFileDate().getStartDate());
+                        System.out.println("FileNames: " + Arrays.toString(sdatFileWithDate.getFileDate().getFileName()));
+                        for (SDATFile sdatFile : sdatFileWithDate.getSDATFiles()) {
+                            System.out.println(sdatFile.getEconomicActivity());
+                            System.out.println("Observations: " + sdatFile.getObservations().size());
+                        }
+                        System.out.println("-----");
+                    }
 
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat(GlobalStuff.SDAT_DATE_FORMAT);
                     ObjectMapper objectMapper = new ObjectMapper();

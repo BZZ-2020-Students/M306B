@@ -116,7 +116,7 @@ export function SDATFileDayChart(sdatFilesRaw: any) {
                     decimation: {
                         enabled: true,
                         algorithm: 'lttb',
-                        samples: 1000,
+                        samples: 500,
                     }
                 },
                 scales: {

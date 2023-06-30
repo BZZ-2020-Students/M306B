@@ -1,5 +1,6 @@
 package dev.groupb.m306groupb.model.SDATFile;
 
+import dev.groupb.m306groupb.enums.Unit;
 import dev.groupb.m306groupb.model.FileDate;
 import dev.groupb.m306groupb.utils.FileReader;
 import dev.groupb.m306groupb.utils.SDATFileReader;
@@ -8,6 +9,8 @@ import lombok.Getter;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Getter
@@ -19,6 +22,14 @@ public class SDATCache {
     private final ConcurrentHashMap<FileDate, SDATFile[]> sdatFileHashMap = new ConcurrentHashMap<>();
 
     private SDATCache() {
+    }
+
+    public static SDATCache getInstance() {
+        if (instance == null) {
+            instance = new SDATCache();
+        }
+
+        return instance;
     }
 
     public static void fillCacheParallel(String filesPath) {
@@ -49,14 +60,6 @@ public class SDATCache {
 
             sdatCache.addSDATFile(fileDate, sdatFile);
         }
-    }
-
-    public static SDATCache getInstance() {
-        if (instance == null) {
-            instance = new SDATCache();
-        }
-
-        return instance;
     }
 
     private static void addFileToCache(File file) {
@@ -92,26 +95,55 @@ public class SDATCache {
     }
 
     public void addSDATFile(FileDate fileDate, SDATFile sdatFile) {
+        updateDatesOfObservations(fileDate, sdatFile);
+
         SDATFile[] existing = sdatFileHashMap.get(fileDate);
         FileDate existingFileDate = sdatFileHashMap.keySet().stream().filter(key -> key.equals(fileDate)).findFirst().orElse(null);
         if (existing != null) {
-            SDATFile[] newExisting = new SDATFile[existing.length + 1];
-            System.arraycopy(existing, 0, newExisting, 0, existing.length);
-            newExisting[existing.length] = sdatFile;
+            // Check if the new SDATFile is a duplicate
+            boolean isDuplicate = Arrays.stream(existing).anyMatch(existingSDATFile -> existingSDATFile.getEconomicActivity() == sdatFile.getEconomicActivity());
+            // If it's not a duplicate, add it to the cache
+            if (!isDuplicate) {
+                SDATFile[] newExisting = Arrays.copyOf(existing, existing.length + 1);
+                newExisting[existing.length] = sdatFile;
 
-            if (existingFileDate == null) {
-                sdatFileHashMap.put(fileDate, newExisting);
-                return;
+                if (existingFileDate == null) {
+                    System.err.println("Existing file date is null");
+                    sdatFileHashMap.put(fileDate, newExisting);
+                    return;
+                }
+                // add to the existingFileDate the fileName from the fileDate
+                String[] newFileName = Arrays.copyOf(existingFileDate.getFileName(), existingFileDate.getFileName().length + 1);
+                newFileName[existingFileDate.getFileName().length] = fileDate.getFileName()[0];
+                existingFileDate.setFileName(newFileName);
+
+                sdatFileHashMap.put(existingFileDate, newExisting);
+            } else {
+                System.err.println("Warning: There is already an SDATFile with the EconomicActivity " + sdatFile.getEconomicActivity() + " for this FileDate (" + fileDate.getStartDate() + "). Cannot add another. The file name is: " + Arrays.toString(fileDate.getFileName()));
             }
-            // add to the existingFileDate the fileName from the fileDate
-            String[] newFileName = new String[existingFileDate.getFileName().length + 1];
-            System.arraycopy(existingFileDate.getFileName(), 0, newFileName, 0, existingFileDate.getFileName().length);
-            newFileName[existingFileDate.getFileName().length] = fileDate.getFileName()[0];
-            existingFileDate.setFileName(newFileName);
-
-            sdatFileHashMap.put(existingFileDate, newExisting);
         } else {
             sdatFileHashMap.put(fileDate, new SDATFile[]{sdatFile});
+        }
+    }
+
+
+    private void updateDatesOfObservations(FileDate fileDate, SDATFile sdatFile) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(fileDate.getStartDate());
+        int resolution = sdatFile.getResolution().getResolution();
+        Unit timeUnit = sdatFile.getResolution().getTimeUnit();
+
+        int obsCounter = 0;
+        for (Observation observation : sdatFile.getObservations()) {
+            if (obsCounter >= 1) {
+                if (Objects.requireNonNull(timeUnit) == Unit.MIN) {
+                    calendar.add(Calendar.MINUTE, resolution);
+                }
+            } else {
+                obsCounter++;
+            }
+
+            observation.setRelativeTime(calendar.getTimeInMillis());
         }
     }
 }

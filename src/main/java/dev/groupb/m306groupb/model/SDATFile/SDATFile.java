@@ -15,14 +15,4 @@ public class SDATFile {
     private Resolution resolution;
     private MeasureUnit measureUnit;
     private SortedSet<Observation> observations;
-
-    public String observationsToCSV() {
-        StringBuilder sb = new StringBuilder();
-        for (Observation observation : observations) {
-            sb.append(observation.getVolume());
-            sb.append("|");
-        }
-        sb.deleteCharAt(sb.length() - 1);
-        return sb.toString();
-    }
 }

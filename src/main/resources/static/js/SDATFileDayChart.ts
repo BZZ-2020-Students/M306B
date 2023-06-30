@@ -131,15 +131,15 @@ export function SDATFileDayChart(sdatFilesRaw: any) {
                         },
                         time: {
                             displayFormats: {
-                                'day': 'DD.MM.YYYY, hh:mm:ss',
-                                'hour': 'DD.MM.YYYY, hh:mm:ss',
-                                'minute': 'hh:mm:ss',
-                                'second': 'hh:mm:ss',
                                 'millisecond': 'hh:mm:ss',
+                                'second': 'hh:mm:ss',
+                                'minute': 'hh:mm:ss',
+                                'hour': 'DD.MM.YYYY, hh:mm:ss',
+                                'day': 'DD.MM.YYYY, hh:mm:ss',
                                 'week': 'MMM DD',
-                                'month': 'MMM DD',
-                                'quarter': 'MMM DD',
-                                'year': 'MMM DD',
+                                'month': 'MMM DD YYYY',
+                                'quarter': 'MMM DD YYYY',
+                                'year': 'MMM DD YYYY',
                             }
                         }
                     }
@@ -156,7 +156,6 @@ export function resetZoomChart() {
 export function toggleDecimation() {
     const currentDecimation = sdatFileChart.options.plugins.decimation.enabled;
     const newDecimation = !currentDecimation;
-    console.log(newDecimation)
     sdatFileChart.options.plugins.decimation.enabled = newDecimation;
     sdatFileChart.update();
 
@@ -167,7 +166,6 @@ export function toggleDecimation() {
 export function toggleAnimation() {
     const currentAnimation = sdatFileChart.options.animation;
     const newAnimation = !currentAnimation;
-    console.log(newAnimation)
     sdatFileChart.options.animation = newAnimation;
 
     const animationButton = document.getElementById('chartToggleAnimation');

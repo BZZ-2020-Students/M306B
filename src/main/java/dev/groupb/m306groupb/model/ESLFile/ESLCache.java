@@ -16,7 +16,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ESLCache {
     // Lombok ignore setter and getter
     @Getter(AccessLevel.NONE)
-    @Setter(AccessLevel.NONE)
     private static ESLCache instance;
 
     private final ConcurrentHashMap<FileDate, ESLFile> eslFileMap = new ConcurrentHashMap<>();

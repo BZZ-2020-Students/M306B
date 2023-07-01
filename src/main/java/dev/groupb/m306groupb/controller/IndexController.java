@@ -113,20 +113,19 @@ public class IndexController {
                         index.getAndIncrement();
                     });
 
-                    Map<Date, MeterReading[]> filteredMap = observationHashMap.entrySet()
+                    Map<Long, MeterReading[]> filteredMap = observationHashMap.entrySet()
                             .stream()
                             .filter(entry -> {
                                 Date entryDate = entry.getKey();
                                 return (entryDate.after(earliestDate.get()) || isSameDay(entryDate, earliestDate.get()))
                                         && (entryDate.before(latestDate.get()) || isSameDay(entryDate, latestDate.get()));
                             })
-                            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (v1, v2) -> v1, TreeMap::new));
+                            .collect(Collectors.toMap(entry -> entry.getKey().getTime(), Map.Entry::getValue, (v1, v2) -> v1, TreeMap::new));
 
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat(GlobalStuff.SDAT_DATE_FORMAT);
                     ObjectMapper objectMapper = new ObjectMapper();
                     objectMapper.setDateFormat(simpleDateFormat);
                     String json = objectMapper.writeValueAsString(filteredMap);
-
                     model.addAttribute("meterFiles", json);
                 } catch (JsonProcessingException e) {
                     throw new RuntimeException(e);

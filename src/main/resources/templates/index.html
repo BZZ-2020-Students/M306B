@@ -109,7 +109,8 @@
         toggleAnimation()
     })
 
-    let data = (sdatFiles !== undefined) ? sdatFiles : meterFiles;
+    // if sdatFiles is undefined, then take the meterFiles
+    let data = sdatFiles ? sdatFiles : meterFiles;
     setupHomeScreen(JSON.parse(chartType), data);
 </script>
 

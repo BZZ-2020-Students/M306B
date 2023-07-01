@@ -1,5 +1,6 @@
 import {BASE_URL} from "./Global.js";
 import {SDATFileDayChart} from "./SDATFileDayChart.js";
+import {MeterReadingChart} from "./MeterReadingChart.js";
 
 interface ChartType {
     priority: number;
@@ -30,7 +31,7 @@ export function setupHomeScreen(chartType: ChartType, data: []) {
             break;
         }
         case "METER": {
-            console.log("Unsupported chart type: " + JSON.stringify(chartType))
+            MeterReadingChart(data)
             break;
         }
     }

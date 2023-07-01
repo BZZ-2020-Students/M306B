@@ -10,6 +10,7 @@ import lombok.Getter;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Iterator;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -97,6 +98,17 @@ public class SDATCache {
     public void addSDATFile(FileDate fileDate, SDATFile sdatFile) {
         updateDatesOfObservations(fileDate, sdatFile);
 
+        if (sdatFile.getObservations().size() > 96) {
+            System.err.println("Warning: There are more than 96 observations (there are: "+sdatFile.getObservations().size()+") in the SDATFile with the EconomicActivity " + sdatFile.getEconomicActivity() + " for this FileDate (" + fileDate.getStartDate() + "). The file name is: " + Arrays.toString(fileDate.getFileName()));
+
+            if (sdatFile.getResolution().getResolution() == 15 && sdatFile.getResolution().getTimeUnit() == Unit.MIN) {
+                System.err.println("The resolution is 15 minutes, which means that there are 96 observations in a day. This means that there are more than 1 day of observations in this file. Ignoring all observations after the first day.");
+
+                sdatFile.getObservations().removeIf(element -> sdatFile.getObservations().headSet(element).size() >= 96);
+                System.err.println("There are now " + sdatFile.getObservations().size() + " observations in the SDATFile with the EconomicActivity " + sdatFile.getEconomicActivity() + " for this FileDate (" + fileDate.getStartDate() + "). The file name is: " + Arrays.toString(fileDate.getFileName()));
+            }
+        }
+
         SDATFile[] existing = sdatFileHashMap.get(fileDate);
         FileDate existingFileDate = sdatFileHashMap.keySet().stream().filter(key -> key.equals(fileDate)).findFirst().orElse(null);
         if (existing != null) {
@@ -119,7 +131,7 @@ public class SDATCache {
 
                 sdatFileHashMap.put(existingFileDate, newExisting);
             } else {
-                System.err.println("Warning: There is already an SDATFile with the EconomicActivity " + sdatFile.getEconomicActivity() + " for this FileDate (" + fileDate.getStartDate() + "). Cannot add another. The file name is: " + Arrays.toString(fileDate.getFileName()));
+                System.err.println("Warning: There is already an SDATFile with the EconomicActivity " + sdatFile.getEconomicActivity() + " for this FileDate (" + fileDate.getStartDate() + "). Cannot add another. The file name is: " + Arrays.toString(fileDate.getFileName()) + " the duplicate file name is: " + Arrays.toString(existingFileDate.getFileName()));
             }
         } else {
             sdatFileHashMap.put(fileDate, new SDATFile[]{sdatFile});

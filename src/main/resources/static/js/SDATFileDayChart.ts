@@ -42,8 +42,8 @@ interface SdatWithFileDate {
 }
 
 interface ChartSingleData {
-    x: number,
-    y: number
+    x: number, // timestamp
+    y: number // value
 }
 
 interface ChartData {
@@ -53,7 +53,7 @@ interface ChartData {
 
 let sdatFileChart = null
 
-export function SDATFileDayChart(sdatFilesRaw: any) {
+export function SDATFileDayChart(sdatFilesRaw: any): HTMLCanvasElement {
     let jsonData: SdatWithFileDate[] = JSON.parse(sdatFilesRaw);
 
     const minDate = new Date(jsonData[0].fileDate.startDate);
@@ -98,8 +98,8 @@ export function SDATFileDayChart(sdatFilesRaw: any) {
     }
 
     // @ts-ignore
-    sdatFileChart = new Chart(
-        document.getElementById('sdat-file-chart') as HTMLCanvasElement,
+    return sdatFileChart = new Chart(
+        document.getElementById('power-chart') as HTMLCanvasElement,
         {
             type: 'line',
             data: {
@@ -147,27 +147,4 @@ export function SDATFileDayChart(sdatFilesRaw: any) {
             }
         }
     );
-}
-
-export function resetZoomChart() {
-    sdatFileChart.resetZoom()
-}
-
-export function toggleDecimation() {
-    const currentDecimation = sdatFileChart.options.plugins.decimation.enabled;
-    const newDecimation = !currentDecimation;
-    sdatFileChart.options.plugins.decimation.enabled = newDecimation;
-    sdatFileChart.update();
-
-    const decimationButton = document.getElementById('chartToggleDecimation');
-    decimationButton.innerText = newDecimation ? 'Disable Decimation' : 'Enable Decimation';
-}
-
-export function toggleAnimation() {
-    const currentAnimation = sdatFileChart.options.animation;
-    const newAnimation = !currentAnimation;
-    sdatFileChart.options.animation = newAnimation;
-
-    const animationButton = document.getElementById('chartToggleAnimation');
-    animationButton.innerText = newAnimation ? 'Disable Animation' : 'Enable Animation';
 }

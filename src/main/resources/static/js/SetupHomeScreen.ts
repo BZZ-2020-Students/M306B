@@ -8,6 +8,7 @@ interface ChartType {
     value: string;
 }
 
+let powerChart = null;
 export function setupHomeScreen(chartType: ChartType, data: []) {
     getDiagramTypes().then(r => {
         const diagramTypes = r;
@@ -27,11 +28,11 @@ export function setupHomeScreen(chartType: ChartType, data: []) {
 
     switch (chartType.value) {
         case "USAGE": {
-            SDATFileDayChart(data)
+            powerChart = SDATFileDayChart(data)
             break;
         }
         case "METER": {
-            MeterReadingChart(data)
+            powerChart = MeterReadingChart(data)
             break;
         }
     }
@@ -41,4 +42,27 @@ async function getDiagramTypes() {
     const response = await fetch(`${BASE_URL}/diagramTypes`);
 
     return await response.json() as ChartType[];
+}
+
+export function resetZoomChart() {
+    powerChart.resetZoom()
+}
+
+export function toggleDecimation() {
+    const currentDecimation = powerChart.options.plugins.decimation.enabled;
+    const newDecimation = !currentDecimation;
+    powerChart.options.plugins.decimation.enabled = newDecimation;
+    powerChart.update();
+
+    const decimationButton = document.getElementById('chartToggleDecimation');
+    decimationButton.innerText = newDecimation ? 'Disable Decimation' : 'Enable Decimation';
+}
+
+export function toggleAnimation() {
+    const currentAnimation = powerChart.options.animation;
+    const newAnimation = !currentAnimation;
+    powerChart.options.animation = newAnimation;
+
+    const animationButton = document.getElementById('chartToggleAnimation');
+    animationButton.innerText = newAnimation ? 'Disable Animation' : 'Enable Animation';
 }

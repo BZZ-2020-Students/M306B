@@ -32,7 +32,7 @@
     <a href="#" id="export-data-link">Export selected Data</a>
 
     <div style="width: 95%; height: 100%; margin: auto">
-        <canvas id="sdat-file-chart"></canvas>
+        <canvas id="power-chart"></canvas>
         <div id="footer">
             <button id="chartResetButton">Reset zoom</button>
             <button id="chartToggleDecimation">Disable Decimation</button>
@@ -94,8 +94,7 @@
         window.location.search = urlParams.toString();
     });
 
-    import {setupHomeScreen} from "./js/SetupHomeScreen.js";
-    import {resetZoomChart, toggleDecimation, toggleAnimation} from "./js/SDATFileDayChart.js";
+    import {setupHomeScreen, resetZoomChart, toggleDecimation, toggleAnimation} from "./js/SetupHomeScreen.js";
 
     document.getElementById('chartResetButton').addEventListener('click', () => {
         resetZoomChart()

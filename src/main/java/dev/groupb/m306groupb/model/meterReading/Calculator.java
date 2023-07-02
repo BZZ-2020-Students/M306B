@@ -30,7 +30,6 @@ public class Calculator {
 
     public static void calcuteValues(List<SDATFileWithDate> fileDateSdatFilesList, List<ESLFileWithDate> fileDateESLFilesList) {
         if (fileDateESLFilesList.get(0).getFileDate().getStartDate().before(fileDateSdatFilesList.get(0).getFileDate().getStartDate())) {
-            System.out.println("Im if drin");
             int indexESLFiles = 0;
             int indexSDATFiles = 0;
             double valueConsumption = 0;
@@ -87,7 +86,6 @@ public class Calculator {
                 }
             }
         } else {
-            System.out.println("Nicht im if");
             int indexESLFiles = 0;
             int indexSDATFiles = 0;
             double valueConsumption = 0;
@@ -110,7 +108,7 @@ public class Calculator {
                                 FileDate fileDate = FileDate.builder().startDate(timeProduction.getTime()).build();
                                 MeterReading meterReading = new MeterReading();
                                 meterReading.setValue(valueProduction);
-                                System.out.println(valueProduction);
+                                System.out.println("Production at " + fileDate.getStartDate() + ": " + valueConsumption);
                                 meterReading.setType(EconomicActivity.Production);
                                 meterReadingCache.getObservationHashMap().put(fileDate, meterReading);
                             }
@@ -127,7 +125,7 @@ public class Calculator {
                                 FileDate fileDate = FileDate.builder().startDate(timeConsumption.getTime()).build();
                                 MeterReading meterReading = new MeterReading();
                                 meterReading.setValue(valueConsumption);
-                                System.out.println(valueConsumption);
+                                System.out.println("Consumption at " + fileDate.getStartDate() + ": " + valueConsumption);
                                 meterReading.setType(EconomicActivity.Consumption);
                                 meterReadingCache.getObservationHashMap().put(fileDate, meterReading);
                             }

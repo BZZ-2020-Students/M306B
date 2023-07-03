@@ -39,7 +39,8 @@ public class Calculator {
                 valueConsumption = fileDateESLFilesList.get(indexESLFiles).getESLFiles().getHighTariffConsumption() + fileDateESLFilesList.get(indexESLFiles).getESLFiles().getLowTariffConsumption();
                 Calendar timeConsumption = Calendar.getInstance();
                 Calendar timeProduction = Calendar.getInstance();
-                timeConsumption.setTime(fileDateESLFilesList.get(indexESLFiles).getFileDate().getStartDate());
+                timeConsumption.setTime(fileDateESLFilesList.get(indexESLFiles).getFileDate().getFileCreationDate());
+                timeProduction.setTime(fileDateESLFilesList.get(indexESLFiles).getFileDate().getFileCreationDate());
                 valueProduction = fileDateESLFilesList.get(indexESLFiles).getESLFiles().getHighTariffProduction() + fileDateESLFilesList.get(indexESLFiles).getESLFiles().getLowTariffProduction();
                 for (; indexSDATFiles < fileDateSdatFilesList.size(); indexSDATFiles++) {
                     if (fileDateSdatFilesList.get(indexSDATFiles).getFileDate().getStartDate().before(fileDateESLFilesList.get(indexESLFiles).getFileDate().getStartDate())) {
@@ -129,11 +130,12 @@ public class Calculator {
                     }
                 }
                 for (; indexESLFiles < fileDateESLFilesList.size(); indexESLFiles++) {
-                    if (fileDateSdatFilesList.get(indexSDATFiles).getFileDate().getStartDate().after(fileDateESLFilesList.get(indexESLFiles).getFileDate().getStartDate())) {
+                    if (fileDateSdatFilesList.get(indexSDATFiles).getFileDate().getFileCreationDate().after(fileDateESLFilesList.get(indexESLFiles).getFileDate().getFileCreationDate())) {
                         break;
                     }
                     valueConsumption = fileDateESLFilesList.get(indexESLFiles).getESLFiles().getHighTariffConsumption() + fileDateESLFilesList.get(indexESLFiles).getESLFiles().getLowTariffConsumption();
-                    timeConsumption.setTime(fileDateESLFilesList.get(indexESLFiles).getFileDate().getStartDate());
+                    timeConsumption.setTime(fileDateESLFilesList.get(indexESLFiles).getFileDate().getFileCreationDate());
+                    timeProduction.setTime(fileDateESLFilesList.get(indexESLFiles).getFileDate().getFileCreationDate());
 //                    valueProduction = fileDateESLFilesList.get(indexESLFiles).getESLFiles().getHighTariffProduction() + fileDateESLFilesList.get(indexESLFiles).getESLFiles().getLowTariffProduction();
                 }
             }

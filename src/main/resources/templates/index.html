@@ -10,6 +10,8 @@
 
 <script th:src="@{/js/chartjs.umd.js}"></script>
 <script th:src="@{/js/chartjs-plugin-zoom.min.js}"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@^2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@^1"></script>
 <body class="container">
 <div class="dropdown-menu">
     <label>
@@ -29,9 +31,11 @@
     </div>
 </div>
 <div class="chart">
-    <canvas id="sdat-file-chart"></canvas>
+    <canvas id="power-chart"></canvas>
     <div id="footer">
         <button id="chartResetButton">Reset zoom</button>
+        <button id="chartToggleDecimation">Disable Decimation</button>
+        <button id="chartToggleAnimation">Enable Animations</button>
     </div>
 </div>
 <div class="export_upload_container">
@@ -108,14 +112,22 @@
         window.location.search = urlParams.toString();
     });
 
-    import {setupHomeScreen} from "./js/SetupHomeScreen.js";
-    import {resetZoomChart} from "./js/SDATFileDayChart.js";
+    import {setupHomeScreen, resetZoomChart, toggleDecimation, toggleAnimation} from "./js/SetupHomeScreen.js";
 
-    document.getElementById('chartResetButton').addEventListener('click', (event) => {
+    document.getElementById('chartResetButton').addEventListener('click', () => {
         resetZoomChart()
     })
 
-    let data = (sdatFiles !== undefined) ? sdatFiles : meterFiles;
+    document.getElementById('chartToggleDecimation').addEventListener('click', () => {
+        toggleDecimation()
+    })
+
+    document.getElementById('chartToggleAnimation').addEventListener('click', () => {
+        toggleAnimation()
+    })
+
+    // if sdatFiles is undefined, then take the meterFiles
+    let data = sdatFiles ? sdatFiles : meterFiles;
     setupHomeScreen(JSON.parse(chartType), data);
 </script>
 

@@ -1,45 +1,12 @@
-enum FileType {
-    Consumption = "Consumption",
-    Production = "Production"
+interface DataPoint {
+    value: number;
+    type: string;
 }
 
-enum MeasureUnit {
-    KWH = "KWH",
+interface Data {
+    [timestamp: string]: DataPoint[];
 }
 
-enum TimeUnit {
-    MIN = "MIN",
-}
-
-interface FileDate {
-    fileName: string,
-    fileCreationDate: string;
-    startDate: string;
-    endDate: string;
-}
-
-interface Resolution {
-    timeUnit: TimeUnit;
-    resolution: number;
-}
-
-interface Observation {
-    position: number;
-    volume: number;
-    relativeTime: number;
-}
-
-interface SdatFile {
-    economicActivity: FileType;
-    resolution: Resolution;
-    measureUnit: MeasureUnit;
-    observations: Observation[];
-}
-
-interface SdatWithFileDate {
-    fileDate: FileDate;
-    sdatfiles: SdatFile[];
-}
 
 interface ChartSingleData {
     x: number, // timestamp
@@ -51,14 +18,29 @@ interface ChartData {
     data: ChartSingleData[],
 }
 
-let sdatFileChart = null
+let meterReadingChart = null
 
-export function SDATFileDayChart(sdatFilesRaw: any): HTMLCanvasElement {
-    let jsonData: SdatWithFileDate[] = JSON.parse(sdatFilesRaw);
+export function MeterReadingChart(meterReadingRaw: any): HTMLCanvasElement {
+    const jsonData: Data = JSON.parse(meterReadingRaw);
 
-    const minDate = new Date(jsonData[0].fileDate.startDate);
-    const maxDate = new Date(jsonData[jsonData.length - 1].fileDate.startDate);
-    maxDate.setDate(maxDate.getDate() + 1);
+    const timestamps = Object.keys(jsonData);
+    // Convert earliestDate and latestDate to Date objects
+    const earliestDate = new Date(Number(timestamps[0]));
+    const latestDate = new Date(timestamps[timestamps.length - 1]);
+
+    const consumptionData: { x: number; y: number }[] = [];
+    const productionData: { x: number; y: number }[] = [];
+
+    for (const timestamp in jsonData) {
+        const timestampNumber = Number(timestamp);
+        for (const dataPoint of jsonData[timestamp]) {
+            if (dataPoint.type === "Consumption") {
+                consumptionData.push({x: timestampNumber, y: dataPoint.value});
+            } else if (dataPoint.type === "Production") {
+                productionData.push({x: timestampNumber, y: dataPoint.value});
+            }
+        }
+    }
 
     const zoomOptions = {
         pan: {
@@ -80,30 +62,22 @@ export function SDATFileDayChart(sdatFilesRaw: any): HTMLCanvasElement {
         }
     };
 
-    let datasets: ChartData[] = [];
-    for (let sdatWithFileDate of jsonData) {
-        for (let sdatFile of sdatWithFileDate.sdatfiles) {
-            let dataset = datasets.find(dataset => dataset.label === sdatFile.economicActivity);
-            if (!dataset) {
-                dataset = {label: sdatFile.economicActivity, data: []};
-                datasets.push(dataset);
-            }
-            for (let observation of sdatFile.observations) {
-                dataset.data.push({
-                    x: observation.relativeTime,
-                    y: observation.volume
-                });
-            }
-        }
-    }
-
     // @ts-ignore
-    return sdatFileChart = new Chart(
+    return meterReadingChart = new Chart(
         document.getElementById('power-chart') as HTMLCanvasElement,
         {
             type: 'line',
             data: {
-                datasets: datasets,
+                datasets: [
+                    {
+                        label: 'Consumption',
+                        data: consumptionData,
+                    },
+                    {
+                        label: 'Production',
+                        data: productionData,
+                    },
+                ],
             },
             options: {
                 indexAxis: 'x',
@@ -122,8 +96,8 @@ export function SDATFileDayChart(sdatFilesRaw: any): HTMLCanvasElement {
                 scales: {
                     x: {
                         type: 'time',
-                        suggestedMin: minDate,
-                        suggestedMax: maxDate,
+                        suggestedMin: earliestDate,
+                        suggestedMax: latestDate,
                         ticks: {
                             source: 'auto',
                             autoSkip: true,

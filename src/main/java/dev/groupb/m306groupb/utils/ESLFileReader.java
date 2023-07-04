@@ -44,7 +44,7 @@ public class ESLFileReader implements FileReader<ESLFile> {
             NodeList timePeriodList = doc.getElementsByTagName("TimePeriod");
             Node timePeriod = timePeriodList.item(index);
             String end = timePeriod.getAttributes().getNamedItem("end").getNodeValue();
-            fileDate.setEndDate(dateFormat.parse(end));
+            fileDate.setStartDate(dateFormat.parse(end));
 
             fileDate.setFileName(new String[]{file.getName()});
 

@@ -10,18 +10,17 @@ import lombok.Setter;
 import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Getter
 public class ESLCache {
     // Lombok ignore setter and getter
     @Getter(AccessLevel.NONE)
-    @Setter(AccessLevel.NONE)
     private static ESLCache instance;
 
-    private final HashMap<FileDate, ESLFile> eslFileMap = new HashMap<>();
+    private final ConcurrentHashMap<FileDate, ESLFile> eslFileMap = new ConcurrentHashMap<>();
 
     private ESLCache() {
-
     }
 
     public static void fillCacheParallel(String filesPath) {

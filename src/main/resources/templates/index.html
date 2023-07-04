@@ -101,7 +101,7 @@
         urlParams.set('to', to);
     }
 
-    const dataType = undefined // TODO
+    const dataType = urlParams.get('type');
     const exportDataLink = document.getElementById('export-data-link');
     const exportFormatType = document.getElementById('export-data-type-selection');
     exportDataLink.href = `/export/${exportFormatType.value}/${dataType}/${from}/${to}`;

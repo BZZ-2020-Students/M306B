@@ -9,6 +9,7 @@ interface ChartType {
 }
 
 let powerChart = null;
+
 export function setupHomeScreen(chartType: ChartType, data: []) {
     getDiagramTypes().then(r => {
         const diagramTypes = r;

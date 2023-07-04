@@ -21,16 +21,19 @@ public class SDATFileChangeListener implements FileChangeListener {
                         System.out.println("SDAT File added: " + cfile.getFile().getName());
                         SDATCache.addNewFile(cfile.getFile());
                         MeterReadingCache.fillCacheParallel();
+                        System.out.println("Caches updated");
                     }
                     case DELETE -> {
                         System.out.println("SDAT File deleted: " + cfile.getFile().getName());
                         SDATCache.fileRemoved(cfile.getFile().getName());
                         MeterReadingCache.fillCacheParallel();
+                        System.out.println("Caches updated");
                     }
                     case MODIFY -> {
                         System.out.println("SDAT File modified: " + cfile.getFile().getName());
                         SDATCache.fileChanged(cfile.getFile().getName(), cfile.getFile());
                         MeterReadingCache.fillCacheParallel();
+                        System.out.println("Caches updated");
                     }
                 }
             }

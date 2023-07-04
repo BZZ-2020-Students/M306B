@@ -1,12 +1,15 @@
 package dev.groupb.m306groupb.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.groupb.m306groupb.enums.DiagramTypes;
 import dev.groupb.m306groupb.enums.ExportTypes;
 import dev.groupb.m306groupb.enums.Unit;
 import dev.groupb.m306groupb.model.FileDate;
 import dev.groupb.m306groupb.model.SDATFile.Observation;
 import dev.groupb.m306groupb.model.SDATFile.SDATCache;
 import dev.groupb.m306groupb.model.SDATFile.SDATFile;
+import dev.groupb.m306groupb.model.meterReading.MeterReading;
+import dev.groupb.m306groupb.model.meterReading.MeterReadingCache;
 import dev.groupb.m306groupb.utils.GlobalStuff;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -22,72 +25,120 @@ import org.supercsv.prefs.CsvPreference;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/export")
 public class FileExportController {
-    private final SDATCache cacheData = SDATCache.getInstance();
-
     /**
      * Exports the data to a specified format
      *
-     * @param typePath The type of the export (csv, json)
-     * @param from     The start date of the export
-     * @param to       The end date of the export
-     * @param response The response object
+     * @param exportType The type of the export (csv, json)
+     * @param from       The start date of the export
+     * @param to         The end date of the export
+     * @param response   The response object
      * @throws IOException If the export fails
      */
     @GetMapping(
-            value = "/{type}/{from}/{to}",
+            value = "/{exportType}/{dataType}/{from}/{to}",
             produces = MediaType.APPLICATION_OCTET_STREAM_VALUE
     )
-    public void exportDataCSV(
-            @PathVariable("type") String typePath,
+    public void exportUsageCSV(
+            @PathVariable("exportType") String exportType,
+            @PathVariable("dataType") String dataType,
             @PathVariable("from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date from,
             @PathVariable("to") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date to,
             HttpServletResponse response
     ) throws IOException {
-        // Retrieve the relevant SDATFiles from the SDATCache within the specified time range
-        Calendar cal1 = Calendar.getInstance();
-        Calendar cal2 = Calendar.getInstance();
-        cal1.setTime(from);
-        cal2.setTime(to);
-        boolean sameDay = cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
-                cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
+        DiagramTypes diagramType = DiagramTypes.fromString(dataType);
 
-        Map<FileDate, SDATFile[]> filteredMap;
-        if (sameDay) {
-            filteredMap = cacheData.getSdatFileHashMap().entrySet().stream().parallel()
-                    .filter(entry -> {
-                        Calendar cal3 = Calendar.getInstance();
-                        cal3.setTime(entry.getKey().getStartDate());
-                        return cal1.get(Calendar.YEAR) == cal3.get(Calendar.YEAR) &&
-                                cal1.get(Calendar.DAY_OF_YEAR) == cal3.get(Calendar.DAY_OF_YEAR);
-                    })
-                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-        } else {
-            Calendar cal4 = Calendar.getInstance();
-            cal4.setTime(to);
-            cal4.add(Calendar.DATE, 1); // add one day to make the range inclusive
-            Date inclusiveLatestDate = cal4.getTime();
-            filteredMap = cacheData.getSdatFileHashMap().entrySet().stream().parallel()
-                    .filter(entry ->
-                            !entry.getKey().getStartDate().before(from) && !entry.getKey().getStartDate().after(inclusiveLatestDate)
-                    )
-                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-        }
+        switch (diagramType) {
+            case USAGE -> {
+                ConcurrentHashMap<FileDate, SDATFile[]> cacheData = SDATCache.getInstance().getSdatFileHashMap();
+                // Retrieve the relevant SDATFiles from the SDATCache within the specified time range
+                Calendar cal1 = Calendar.getInstance();
+                Calendar cal2 = Calendar.getInstance();
+                cal1.setTime(from);
+                cal2.setTime(to);
+                boolean sameDay = cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
+                        cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
 
-        // Sort the map by using the CompareTo method of the FileDate class
-        Map<FileDate, SDATFile[]> sortedMap = new TreeMap<>(filteredMap);
+                Map<FileDate, SDATFile[]> filteredMap;
+                if (sameDay) {
+                    filteredMap = cacheData.entrySet().stream().parallel()
+                            .filter(entry -> {
+                                Calendar cal3 = Calendar.getInstance();
+                                cal3.setTime(entry.getKey().getStartDate());
+                                return cal1.get(Calendar.YEAR) == cal3.get(Calendar.YEAR) &&
+                                        cal1.get(Calendar.DAY_OF_YEAR) == cal3.get(Calendar.DAY_OF_YEAR);
+                            })
+                            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                } else {
+                    Calendar cal4 = Calendar.getInstance();
+                    cal4.setTime(to);
+                    cal4.add(Calendar.DATE, 1); // add one day to make the range inclusive
+                    Date inclusiveLatestDate = cal4.getTime();
+                    filteredMap = cacheData.entrySet().stream().parallel()
+                            .filter(entry ->
+                                    !entry.getKey().getStartDate().before(from) && !entry.getKey().getStartDate().after(inclusiveLatestDate)
+                            )
+                            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                }
 
-        switch (ExportTypes.fromString(typePath)) {
-            case CSV -> exportDataCSV(response, sortedMap, from, to);
-            case JSON -> exportDataJSON(response, sortedMap, from, to);
+                // Sort the map by using the CompareTo method of the FileDate class
+                Map<FileDate, SDATFile[]> sortedMap = new TreeMap<>(filteredMap);
+
+                switch (ExportTypes.fromString(exportType)) {
+                    case CSV -> exportUsageCSV(response, sortedMap, from, to);
+                    case JSON -> exportUsageJSON(response, sortedMap, from, to);
+                }
+            }
+
+            case METER -> {
+                Map<Date, MeterReading[]> cacheData = MeterReadingCache.getInstance().getObservationHashMap();
+                // Retrieve the relevant SDATFiles from the SDATCache within the specified time range
+                Calendar cal1 = Calendar.getInstance();
+                Calendar cal2 = Calendar.getInstance();
+                cal1.setTime(from);
+                cal2.setTime(to);
+                boolean sameDay = cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
+                        cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
+
+                Map<Date, MeterReading[]> filteredMap;
+                if (sameDay) {
+                    filteredMap = cacheData.entrySet().stream().parallel()
+                            .filter(entry -> {
+                                Calendar cal3 = Calendar.getInstance();
+                                cal3.setTime(entry.getKey());
+                                return cal1.get(Calendar.YEAR) == cal3.get(Calendar.YEAR) &&
+                                        cal1.get(Calendar.DAY_OF_YEAR) == cal3.get(Calendar.DAY_OF_YEAR);
+                            })
+                            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                } else {
+                    Calendar cal4 = Calendar.getInstance();
+                    cal4.setTime(to);
+                    cal4.add(Calendar.DATE, 1); // add one day to make the range inclusive
+                    Date inclusiveLatestDate = cal4.getTime();
+                    filteredMap = cacheData.entrySet().stream().parallel()
+                            .filter(entry ->
+                                    !entry.getKey().before(from) && !entry.getKey().after(inclusiveLatestDate)
+                            )
+                            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                }
+
+                // Sort the map by using the CompareTo method of the FileDate class
+                Map<Date, MeterReading[]> sortedMap = new TreeMap<>(filteredMap);
+
+                switch (ExportTypes.fromString(exportType)) {
+                    case CSV -> exportMeterCSV(response, sortedMap, from, to);
+                    case JSON -> exportMeterJSON(response, sortedMap, from, to);
+                }
+            }
         }
     }
 
-    private void exportDataCSV(HttpServletResponse response, Map<FileDate, SDATFile[]> filteredMap, Date from, Date to) throws IOException {
+    private void exportMeterCSV(HttpServletResponse response, Map<Date, MeterReading[]> filteredMap, Date from, Date to) throws IOException {
         response.setContentType("text/csv");
         SimpleDateFormat dateFormat = new SimpleDateFormat(GlobalStuff.FILENAME_DATE_FORMAT);
         String currentDateTime = dateFormat.format(new Date());
@@ -96,7 +147,77 @@ public class FileExportController {
 
         String fromDate = dateFormat.format(from);
         String toDate = dateFormat.format(to);
-        String fileName = "data_" + currentDateTime + "_from_" + fromDate + "_to_" + toDate + ".csv";
+        String fileName = "data_meter_" + currentDateTime + "_from_" + fromDate + "_to_" + toDate + ".csv";
+        String headerValue = "attachment; filename=" + fileName;
+        response.setHeader(headerKey, headerValue);
+
+        // Generate CSV content
+        String[] csvHeader = {"timestamp", "consumption", "production"};
+
+        try (ICsvListWriter listWriter = new CsvListWriter(response.getWriter(), CsvPreference.EXCEL_PREFERENCE)) {
+            listWriter.writeHeader(csvHeader);
+
+            for (Map.Entry<Date, MeterReading[]> entry : filteredMap.entrySet()) {
+                Date fileDate = entry.getKey();
+                MeterReading[] sdatFiles = entry.getValue();
+
+                MeterReading consumptionFile = null;
+                MeterReading productionFile = null;
+
+                for (MeterReading sdatFile : sdatFiles) {
+                    switch (sdatFile.getType()) {
+                        case Production -> productionFile = sdatFile;
+                        case Consumption -> consumptionFile = sdatFile;
+                    }
+                }
+
+                if (consumptionFile == null || productionFile == null) {
+                    System.err.println("Could not find both consumption and production file for date " + fileDate + "!");
+                    continue;
+                }
+
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTime(fileDate);
+                long timestamp = calendar.getTimeInMillis();
+                double consumptionVolume = consumptionFile.getValue();
+                double productionVolume = productionFile.getValue();
+
+                listWriter.write(timestamp, consumptionVolume, productionVolume);
+            }
+        }
+    }
+
+    private void exportMeterJSON(HttpServletResponse response, Map<Date, MeterReading[]> filteredMap, Date from, Date to) throws IOException {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(GlobalStuff.SDAT_DATE_FORMAT);
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.setDateFormat(simpleDateFormat);
+        String json = objectMapper.writeValueAsString(filteredMap);
+
+        response.setContentType("application/json");
+        SimpleDateFormat dateFormat = new SimpleDateFormat(GlobalStuff.FILENAME_DATE_FORMAT);
+        String currentDateTime = dateFormat.format(new Date());
+
+        String headerKey = "Content-Disposition";
+
+        String fromDate = dateFormat.format(from);
+        String toDate = dateFormat.format(to);
+        String fileName = "data_meter_" + currentDateTime + "_from_" + fromDate + "_to_" + toDate + ".json";
+        String headerValue = "attachment; filename=" + fileName;
+        response.setHeader(headerKey, headerValue);
+
+        response.getWriter().write(json);
+    }
+
+    private void exportUsageCSV(HttpServletResponse response, Map<FileDate, SDATFile[]> filteredMap, Date from, Date to) throws IOException {
+        response.setContentType("text/csv");
+        SimpleDateFormat dateFormat = new SimpleDateFormat(GlobalStuff.FILENAME_DATE_FORMAT);
+        String currentDateTime = dateFormat.format(new Date());
+
+        String headerKey = "Content-Disposition";
+
+        String fromDate = dateFormat.format(from);
+        String toDate = dateFormat.format(to);
+        String fileName = "data_usage_" + currentDateTime + "_from_" + fromDate + "_to_" + toDate + ".csv";
         String headerValue = "attachment; filename=" + fileName;
         response.setHeader(headerKey, headerValue);
 
@@ -153,7 +274,7 @@ public class FileExportController {
         }
     }
 
-    private void exportDataJSON(HttpServletResponse response, Map<FileDate, SDATFile[]> filteredMap, Date from, Date to) throws IOException {
+    private void exportUsageJSON(HttpServletResponse response, Map<FileDate, SDATFile[]> filteredMap, Date from, Date to) throws IOException {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(GlobalStuff.SDAT_DATE_FORMAT);
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.setDateFormat(simpleDateFormat);
@@ -167,7 +288,7 @@ public class FileExportController {
 
         String fromDate = dateFormat.format(from);
         String toDate = dateFormat.format(to);
-        String fileName = "data_" + currentDateTime + "_from_" + fromDate + "_to_" + toDate + ".json";
+        String fileName = "data_usage_" + currentDateTime + "_from_" + fromDate + "_to_" + toDate + ".json";
         String headerValue = "attachment; filename=" + fileName;
         response.setHeader(headerKey, headerValue);
 

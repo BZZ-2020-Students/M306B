@@ -10,48 +10,48 @@
 
 <script th:src="@{/js/chartjs.umd.js}"></script>
 <script th:src="@{/js/chartjs-plugin-zoom.min.js}"></script>
-<body>
-<div class="main">
+<body class="container">
+<div class="dropdown-menu">
     <label>
         <select id="chart-selection-dropdown">
         </select>
     </label>
+</div>
 
-    <div class="dates_container">
-        <div class="from">
-            <p class="from_text">From</p>
-            <label for="fromDate"></label><input id="fromDate" type="date"><br>
-        </div>
-        <div class="to">
-            <p class="to_text">To</p>
-            <label for="toDate"></label><input id="toDate" type="date"><br>
+<div class="dates_container">
+    <div class="from">
+        <p class="from_text">From</p>
+        <label for="fromDate"></label><input id="fromDate" type="date"><br>
+    </div>
+    <div class="to">
+        <p class="to_text">To</p>
+        <label for="toDate"></label><input id="toDate" type="date"><br>
+    </div>
+</div>
+<div class="chart">
+    <canvas id="sdat-file-chart"></canvas>
+    <div id="footer">
+        <button id="chartResetButton">Reset zoom</button>
+    </div>
+</div>
+<div class="export_upload_container">
+    <div class="upload_with_drop_down">
+        <i class='fa fa-upload'></i>
+        <div class="upload">
+            <a href="/files/uploadForm">Upload</a>
         </div>
     </div>
-    <div class="export_upload_container">
-        <div class="upload_with_drop_down">
-            <i class='fa fa-upload'></i>
-            <div class="upload">
-                <a href="/files/uploadForm">Upload</a>
-            </div>
-            <label>
-                <select id="export-data-type-selection">
-                    <option value="csv">CSV</option>
-                    <option value="json">JSON</option>
-                </select>
-            </label>
-        </div>
-        <div class="export">
-            <a href="#" id="export-data-link">
-                Export selected Data
-                <i class='fa fa-download'></i>
-            </a>
-        </div>
-    </div>
-    <div class="chart">
-        <canvas id="sdat-file-chart"></canvas>
-        <div id="footer">
-            <button id="chartResetButton">Reset zoom</button>
-        </div>
+    <div class="export">
+        <a href="#" id="export-data-link">
+            Export selected Data
+            <i class='fa fa-download'></i>
+        </a>
+        <label>
+            <select id="export-data-type-selection">
+                <option value="csv">CSV</option>
+                <option value="json">JSON</option>
+            </select>
+        </label>
     </div>
 </div>
 </body>

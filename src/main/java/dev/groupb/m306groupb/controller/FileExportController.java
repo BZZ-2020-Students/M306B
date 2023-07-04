@@ -1,6 +1,7 @@
 package dev.groupb.m306groupb.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.groupb.m306groupb.enums.DiagramTypes;
 import dev.groupb.m306groupb.enums.ExportTypes;
 import dev.groupb.m306groupb.enums.Unit;
 import dev.groupb.m306groupb.model.FileDate;
@@ -32,22 +33,25 @@ public class FileExportController {
     /**
      * Exports the data to a specified format
      *
-     * @param typePath The type of the export (csv, json)
+     * @param exportType The type of the export (csv, json)
      * @param from     The start date of the export
      * @param to       The end date of the export
      * @param response The response object
      * @throws IOException If the export fails
      */
     @GetMapping(
-            value = "/{type}/{from}/{to}",
+            value = "/{exportType}/{dataType}/{from}/{to}",
             produces = MediaType.APPLICATION_OCTET_STREAM_VALUE
     )
     public void exportDataCSV(
-            @PathVariable("type") String typePath,
+            @PathVariable("exportType") String exportType,
+            @PathVariable("dataType") String dataType,
             @PathVariable("from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date from,
             @PathVariable("to") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date to,
             HttpServletResponse response
     ) throws IOException {
+        DiagramTypes diagramType = DiagramTypes.fromString(dataType);
+
         // Retrieve the relevant SDATFiles from the SDATCache within the specified time range
         Calendar cal1 = Calendar.getInstance();
         Calendar cal2 = Calendar.getInstance();
@@ -81,7 +85,7 @@ public class FileExportController {
         // Sort the map by using the CompareTo method of the FileDate class
         Map<FileDate, SDATFile[]> sortedMap = new TreeMap<>(filteredMap);
 
-        switch (ExportTypes.fromString(typePath)) {
+        switch (ExportTypes.fromString(exportType)) {
             case CSV -> exportDataCSV(response, sortedMap, from, to);
             case JSON -> exportDataJSON(response, sortedMap, from, to);
         }

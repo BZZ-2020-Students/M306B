@@ -91,12 +91,13 @@
         urlParams.set('to', to);
     }
 
+    const dataType = undefined // TODO
     const exportDataLink = document.getElementById('export-data-link');
-    const exportDataTypeSelection = document.getElementById('export-data-type-selection');
-    exportDataLink.href = `/export/${exportDataTypeSelection.value}/${from}/${to}`;
+    const exportFormatType = document.getElementById('export-data-type-selection');
+    exportDataLink.href = `/export/${exportFormatType.value}/${dataType}/${from}/${to}`;
 
-    exportDataTypeSelection.addEventListener('change', (event) => {
-        exportDataLink.href = `/export/${event.target.value}/${from}/${to}`;
+    exportFormatType.addEventListener('change', (event) => {
+        exportDataLink.href = `/export/${event.target.value}/${dataType}/${from}/${to}`;
     });
 
     document.getElementById('fromDate').value = from;

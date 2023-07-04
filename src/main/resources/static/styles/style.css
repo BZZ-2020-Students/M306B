@@ -1,3 +1,46 @@
+* {
+    margin: 5px;
+}
+
+.header {
+    text-align: center;
+}
+
+.chartVariant {
+    float: left;
+    width: 33%;
+
+}
+
+.dates {
+    float: left;
+    width: 33%;
+}
+
+#from {
+    float: left;
+    width: 45%
+}
+
+#to {
+    float: right;
+    width: 45%
+}
+
+.upload_with_drop_down {
+    margin: 10px;
+    float: left;
+    width: 45%;
+}
+
+.export {
+    float: right;
+    width: 50%;
+    text-align: right;
+}
+
+
+
 p {
-    color: red;
+    margin-top: 20px !important;
 }

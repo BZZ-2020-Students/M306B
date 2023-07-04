@@ -1,4 +1,8 @@
 <html lang="en" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Importieren</title>
+</head>
 <body>
 
 <div th:if="${message}">
@@ -6,10 +10,12 @@
 </div>
 
 <div>
-    <a href="/">Back</a>
+    <a href="/">
+        <button class="btn btn-primary" >Back</button>
+    </a>
 
     <form enctype="multipart/form-data" id="myForm" method="POST">
-        <table>
+        <table class="table">
             <tr>
                 <td>Choose:</td>
                 <td>

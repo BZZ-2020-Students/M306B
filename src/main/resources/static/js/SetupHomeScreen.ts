@@ -56,7 +56,7 @@ export function toggleDecimation() {
     powerChart.update();
 
     const decimationButton = document.getElementById('chartToggleDecimation');
-    decimationButton.innerText = newDecimation ? 'Disable Decimation' : 'Enable Decimation';
+    decimationButton.innerText = newDecimation ? 'Dezimierung deaktivieren' : 'Dezimierung aktivieren';
 }
 
 export function toggleAnimation() {
@@ -65,5 +65,5 @@ export function toggleAnimation() {
     powerChart.options.animation = newAnimation;
 
     const animationButton = document.getElementById('chartToggleAnimation');
-    animationButton.innerText = newAnimation ? 'Disable Animation' : 'Enable Animation';
+    animationButton.innerText = newAnimation ? 'Animationen deaktivieren' : 'Animationen aktivieren';
 }

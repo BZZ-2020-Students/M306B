@@ -10,7 +10,6 @@ import lombok.Getter;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Iterator;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -99,7 +98,7 @@ public class SDATCache {
         updateDatesOfObservations(fileDate, sdatFile);
 
         if (sdatFile.getObservations().size() > 96) {
-            System.err.println("Warning: There are more than 96 observations (there are: "+sdatFile.getObservations().size()+") in the SDATFile with the EconomicActivity " + sdatFile.getEconomicActivity() + " for this FileDate (" + fileDate.getStartDate() + "). The file name is: " + Arrays.toString(fileDate.getFileName()));
+            System.err.println("Warning: There are more than 96 observations (there are: " + sdatFile.getObservations().size() + ") in the SDATFile with the EconomicActivity " + sdatFile.getEconomicActivity() + " for this FileDate (" + fileDate.getStartDate() + "). The file name is: " + Arrays.toString(fileDate.getFileName()));
 
             if (sdatFile.getResolution().getResolution() == 15 && sdatFile.getResolution().getTimeUnit() == Unit.MIN) {
                 System.err.println("The resolution is 15 minutes, which means that there are 96 observations in a day. This means that there are more than 1 day of observations in this file. Ignoring all observations after the first day.");

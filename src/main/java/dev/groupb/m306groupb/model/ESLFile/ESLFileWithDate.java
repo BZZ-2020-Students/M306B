@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class ESLFileWithDate implements Comparable<ESLFileWithDate>{
+public class ESLFileWithDate implements Comparable<ESLFileWithDate> {
     private ESLFile ESLFile;
     private FileDate fileDate;
 

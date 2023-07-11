@@ -1,0 +1,29 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: 20
+
+      - name: Build with Maven
+        run: mvn package
+
+      - name: Create Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "target/*.jar"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.ref }}
